@@ -1,6 +1,8 @@
 #include <iostream>
+#include "Parameters.h"
 
 int main() {
-    std::cout << "asdf" << std::endl;
-    return 0;
+	std::string file_name = "Parameters_file.txt";
+	Parameters par(file_name);
+	return 0;
 }

@@ -28,12 +28,15 @@ Parameters::Parameters(std::string file_name) {
             std::string var_name = line.substr(0, line.find(sep));
             std::string value = line.substr(line.find(sep), '\0');
             const char* val_type = typeid(vars[var_name]).name();
-            if (val_type == "double") {
-                *(double*)vars[var_name] = std::stof(value);
+            if (val_type == "f") {
+                *(float*)vars[var_name] = std::stof(value);
             }
-            else if (val_type == "int") {
-
+            else if (val_type == "j") {
+		*(unsigned int*)vars[var_name] = std::stoi(value);
             }
+	    else if (val_type == "1E") {
+	    	*(enum*)vars[var_name] = E_BOUNDARY_TYPE(std::stoi(value));
+	    }
         }
     }
     fin.close();

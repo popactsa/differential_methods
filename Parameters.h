@@ -5,23 +5,23 @@
 #include <iostream>
 #include <fstream>
 enum E_BOUNDARY_TYPE {IN, OUT, FREE_FLUX, WALL, SYM, PERIODIC, NO_REF};
-class Parameters {
-    double g_x, g_y, g_z;
-    double x_start, x_end;
-    double y_start, y_end;
-    double z_start, z_end;
-    int nx, ny, nz;
-    double CFL;
-    double t_end;
-    double dt;
+const class Parameters {
+    float g_x, g_y, g_z;
+    float x_start, x_end;
+    float y_start, y_end;
+    float z_start, z_end;
+    unsigned int nx, ny, nz;
+    float CFL;
+    float t_end;
+    float dt;
     E_BOUNDARY_TYPE type;
 
-    double Cp, Cv;
-    double gamma = Cp / Cv;
-    double R;
+    unsigned float Cp, Cv;
+    unsigned float gamma = Cp / Cv;
+    unsigned float R;
 
-    double t_write;
-    short int nt_write;
+    unsigned float t_write;
+    unsigned int nt_write;
     std::string write_file;
 
 public:
