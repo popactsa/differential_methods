@@ -54,7 +54,7 @@ Parameters::Parameters(std::string file_name) {
 				*(std::string*)vars[var_name] = var_value;
 			}
 			else {
-				std::cerr << "Variable type is not indentified" << std::endl;
+				std::cerr << "Variable type is not identified: " << var_name << " " << var_type << std::endl;
 				exit(1);
 			}
 //			std::cout << var_type << " " << var_name << " " << var_value << std::endl;
