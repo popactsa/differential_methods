@@ -2,7 +2,7 @@
 
 Parameters::Parameters(std::string file_name) {
 	std::ifstream fin(file_name);
-	std::map<const char*, void*> vars = {
+	std::map<std::string, void*> vars = {
 		{"g_x", &g_x},
 		{"g_y", &g_y},
 		{"g_z", &g_z},
@@ -15,6 +15,7 @@ Parameters::Parameters(std::string file_name) {
 		{"nx", &nx},
 		{"ny", &ny},   
 		{"nz", &nz},
+		{"n_walls", &n_walls},
 		{"CFL", &CFL},
 		{"t_end", &t_end},
 		{"nt_write", &nt_write},
@@ -23,25 +24,40 @@ Parameters::Parameters(std::string file_name) {
 	if (fin.is_open()) {
 		std::string line;
 		const std::string sep = "\t";
-		std::getline(fin, line);
-		for (; !fin.eof(); std::getline(fin, line)) {
-			unsigned int curr_sep = 0;
-			const char* var_type = get_next_substr_between_sep(line, sep, curr_sep);
-			const char* var_name = get_next_substr_between_sep(line, sep, curr_sep);
-			const char* var_value = get_next_substr_between_sep(line, sep, curr_sep);
-			if (var_type = "float") {
+		for (std::getline(fin, line); !fin.eof(); std::getline(fin, line)) {
+			unsigned int curr_sep_pos = 0;
+			std::string var_type, var_name, var_value;
+			get_next_substr_between_sep(var_type, line, sep, curr_sep_pos);
+			get_next_substr_between_sep(var_name, line, sep, curr_sep_pos);
+			get_next_substr_between_sep(var_value, line, sep, curr_sep_pos);
+			if (strcmp(var_type.c_str(), "float") == 0) {
 				*(float*)vars[var_name] = std::stof(var_value);
 		    	}
-		    	else if (var_type == "unsignedint") {
+		    	else if (strcmp(var_type.c_str(), "unsignedint") == 0) {
 		    		*(unsigned int*)vars[var_name] = std::stoi(var_value);
+				if (var_name == "n_walls") {
+					wall_type.resize(n_walls);
+				}
 		    	}
-		    	else if (var_type == "E_BOUNDARY_TYPE") {
-		    		*(E_BOUNDARY_TYPE*)vars[var_name] = E_BOUNDARY_TYPE(std::stoi(var_value));
+		    	else if (strcmp(var_type.c_str(), "E_BOUNDARY_TYPE") == 0) { // specific wall_type case
+				std::string number;
+				get_next_substr_between_sep(number, line, sep, curr_sep_pos);
+				if (wall_type.size() > std::stoi(number)) {
+					wall_type.at(std::stoi(number)) = wall_type_map[var_value];
+				}
+				else {
+					wall_type.push_back(wall_type_map[var_value]);
+					std::cout << "Wall " << number << " type set to " << var_value << std::endl;
+				}
 		    	}
+			else if (strcmp(var_type.c_str(), "string") == 0) {
+				*(std::string*)vars[var_name] = var_value;
+			}
 			else {
 				std::cerr << "Variable type is not indentified" << std::endl;
 				exit(1);
 			}
+//			std::cout << var_type << " " << var_name << " " << var_value << std::endl;
 		}
 	}
 	else {
@@ -49,4 +65,4 @@ Parameters::Parameters(std::string file_name) {
 		exit(1);
 	}
 	fin.close();
-}
+};

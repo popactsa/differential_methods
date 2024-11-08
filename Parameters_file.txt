@@ -1,19 +1,18 @@
 float	x_start	0
-float	x_end   1.0
-float	y_start 0
-float	y_end   0
-float	z_start 0
-float	z_end   0
-unsignedint	nx  100
-unsignedint	ny  1
-unsignedint	nz  1
-float	CFL 0.5
-float	t_end   1.0
-unsignedint	n_walls 2
-E_BOUNDARY_TYPE	type    IN
-E_BOUNDARY_TYPE	type    OUT
-float	g_x = 9.81
-float	g_y = 0.0
-float	g_z = 0.0
-unsignedint	nt_write    1
-string	write_file  result.txt
+float	x_end	1.0
+float	y_start	0
+float	y_end	0
+float	z_start	0
+float	z_end	0
+unsignedint	nx	100
+unsignedint	ny	1
+unsignedint	nz	1
+float	CFL	0.5
+float	t_end	1.0
+E_BOUNDARY_TYPE	type	IN	0
+E_BOUNDARY_TYPE	type	OUT	1
+float	g_x	9.81
+float	g_y	0.0
+float	g_z	0.0
+unsignedint	nt_write	1
+string	write_file	result.txt
