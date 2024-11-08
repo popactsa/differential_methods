@@ -6,13 +6,19 @@
 class Parameters
 {
 public:
-    double l;
-    int N;
+    double x_start, x_end;
+    int N_x;
     double CFL;
     double t_end;
     std::string solver_name;
-    int num_boundarys;
+    int num_boundaries;
     int n_write;
+
+    double gamma = 1.4;
+    double R = 8.31;
+    double Cv = R/(gamma -1);
+    double Cp = gamma*Cv;
+
 };
 
 #endif // PARAMETERS_H

@@ -7,7 +7,7 @@ class Boundary
 {
 public:
     std::string name;
-    double value;
+    double rho, u, v, w, e, T, p;
 };
 
 #endif

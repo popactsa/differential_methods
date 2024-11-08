@@ -5,15 +5,16 @@ int main()
 {
     double CFL = 0.5;
     double l = 1;
-    int N = 120;
+    int N = 100;
     double t_end = 0.1;
-    Boundary bound = {"FREE", 0.0};
+    Boundary bound1 = {"IN",  0.5, 0.1, 0, 0, 0, 1.0, 0};
+    Boundary bound2 = {"OUT", 1, 0, 0, 0, 0, 0, 8.31};
+    // Boundary bound3 = {"WALL", 1, 0, 0, 0, 0, 0, 8.31};
     Boundary* bounds = new Boundary[2];
-    for(int i = 0; i < 2; i++)
-        bounds[i] = bound;
+    bounds[0] = bound1;
+    bounds[1] = bound2;
 
-    Parameters parameters = {1, 120, 0.5, 0.1, "LW", 1, 2};
-    // parameters = Parameters({l, N, CFL, 0.1*N/CFL});         // параметры сетки и расчета
+    Parameters parameters = {0, 1.0, 200, 0.1, 10, "WENO3", 1, 10};// параметры сетки и расчета
     Manager manager(parameters);
     manager.set_boundary_conditions(bounds);    // граничные условия
     manager.create_mesh();                      // создание сетки
@@ -23,18 +24,19 @@ int main()
 
     Solver solver(manager);
 
-    while(solver.t < solver.manager.parameters.t_end)
+    while(solver.manager.t < solver.manager.parameters.t_end && (solver.manager.t_done < 100))
     {
         solver.get_time_step();
-        solver.solve_problem();
+        // std::cout << solver.manager.dt << std::endl;
         solver.apply_boundary_conditions();     // граничные условия
-        write_data(solver, solver.M);           // сохраниение данных если надо
+        solver.solve_problem();
+        write_data(solver, solver.manager.t_done);           // сохраниение данных если надо
     }
 
     int fict = solver.manager.fict;
-    double* c = solver.manager.c;
-    for(int i = fict; i < solver.manager.N_all-fict; i++)
+    // double* c = solver.manager.c;
+    /*for(int i = fict; i < solver.manager.N_all-fict; i++)
     {
         std::cout << c[i] << std::endl;
-    }
+    }*/
 }
