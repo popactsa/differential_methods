@@ -1,4 +1,5 @@
 #include "WENO3.h"
+#include "BoundaryType.h"
 
 WENO3::WENO3(Manager& man): manager(man)
 {
@@ -15,7 +16,7 @@ void WENO3::apply_boundary_conditions()
     for(int k = 0; k < 2; k++)
     {
         Boundary bound = manager.boundaries[k];
-        if(bound.name == "IN")
+        if(bound.name == IN)
         {
             int intern = fict;
             double rho_i = fields[4][intern] - fields[1][intern]*fields[1][intern]/fields[0][intern]/2.0;
@@ -41,7 +42,7 @@ void WENO3::apply_boundary_conditions()
             flows[3][0] = bound.rho*bound.w*bound.u;
             flows[4][0] = gamma*bound.rho*bound.u*bound.e - (gamma-1)*bound.rho*bound.u*bound.u*bound.u/2.0;
         }
-        else if(bound.name == "OUT")
+        else if(bound.name == OUT)
         {
             double dp;
             int intern = N_all-fict-1;
@@ -72,7 +73,7 @@ void WENO3::apply_boundary_conditions()
             flows[3][N_x] = bound.rho*bound.w*bound.u;
             flows[4][N_x] = gamma*bound.rho*bound.u*bound.e - (gamma-1)*bound.rho*bound.u*bound.u*bound.u/2.0;
         }
-        else if(bound.name == "WALL")
+        else if(bound.name == WALL)
         {
             int bc;
             int intern;
@@ -100,7 +101,7 @@ void WENO3::apply_boundary_conditions()
             flows[3][bc] = 0.0;
             flows[4][bc] = 0.0;
         }
-        else if(bound.name == "FLOW")
+        else if(bound.name == FREE_FLUX)
         {
             int bc;
             int intern;

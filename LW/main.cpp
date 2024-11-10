@@ -1,5 +1,6 @@
 #include "Solver.h"
 #include "Writer.h"
+#include "BoundaryType.h"
 
 int main()
 {
@@ -7,9 +8,9 @@ int main()
     double l = 1;
     int N = 100;
     double t_end = 0.1;
-    Boundary bound1 = {"IN",  0.5, 0.1, 0, 0, 0, 1.0, 0};
-    Boundary bound2 = {"OUT", 1, 0, 0, 0, 0, 0, 8.31};
-    // Boundary bound3 = {"WALL", 1, 0, 0, 0, 0, 0, 8.31};
+    Boundary bound1 = {IN,  0.5, 0.1, 0, 0, 0, 1.0, 0};
+    Boundary bound2 = {OUT, 1, 0, 0, 0, 0, 0, 8.31};
+    // Boundary bound3 = {WALL, 1, 0, 0, 0, 0, 0, 8.31};
     Boundary* bounds = new Boundary[2];
     bounds[0] = bound1;
     bounds[1] = bound2;

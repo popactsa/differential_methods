@@ -1,13 +1,13 @@
 #ifndef BOUNDARY_H
 #define BOUNDARY_H
 
-#include<string>
+#include "BoundaryType.h"
 
 class Boundary
 {
 public:
-    std::string name;
-    double rho, u, v, w, e, T, p;
+	BOUNDARY_TYPE name;
+	double rho, u, v, w, e, T, p;
 };
 
 #endif
