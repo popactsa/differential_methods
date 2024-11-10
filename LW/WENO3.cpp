@@ -1,10 +1,10 @@
-#include "Solver.h"
+#include "WENO3.h"
 
-Solver::Solver(Manager& man): manager(man)
+WENO3::WENO3(Manager& man): manager(man)
 {
 }
 
-void Solver::apply_boundary_conditions()
+void WENO3::apply_boundary_conditions()
 {
     int fict = manager.fict;
     int N_all = manager.N_all;
@@ -138,7 +138,7 @@ void Solver::apply_boundary_conditions()
     }*/
 }
 
-void Solver::get_time_step()
+void WENO3::get_time_step()
 {
     double dt_temp = 1;
     double dt_min = dt_temp;
@@ -156,7 +156,7 @@ void Solver::get_time_step()
     manager.dt = dt_min;
 }
 
-void Solver::solve_problem()
+void WENO3::solve_problem()
 {
     double* fields[5] = {manager.rho, manager.u, manager.v, manager.w, manager.e};
     double* fields_left[5];

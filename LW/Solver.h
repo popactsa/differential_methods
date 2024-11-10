@@ -10,9 +10,9 @@ public:
     Manager manager;
 
     Solver(Manager&);
-    void apply_boundary_conditions();
-    void get_time_step();
-    void solve_problem();
+    virtual void apply_boundary_conditions() const = 0;
+    virtual void get_time_step() const  = 0;
+    virtual void solve_problem() const = 0;
 };
 
 #endif
