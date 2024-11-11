@@ -1,10 +1,16 @@
+SLATEC 	= $(wildcard ./*.cpp)
+SLATEC_OBJ = $(addprefix ./,$(notdir $(SLATEC:.cpp=.o)))
+
+FLAGS = -O1
+FCOMP = g++
+
 all: main
 
-main: main.o Parameters.o
-	g++ main.o Parameters.o -o main
+main: $(SLATEC_OBJ)
+	$(FCOMP) $(FLAGS) -o main *.o
 
-main.o: main.cpp
-	g++ -c main.cpp main.o
+%.o: %.cpp
+	$(FCOMP) $(FLAGS) -c $<
 
-Parameters.o: Parameters.cpp
-	g++ -c Parameters.cpp main.o
+clean:
+	rm -f *.o
