@@ -1,18 +1,11 @@
 double	x_start	0.0
 double	x_end	1.0
-double	y_start	0.
-double	y_end	0.
-double	z_start	0.
-double	z_end	0.
-unsignedint	nx	25
-unsignedint	ny	1
-unsignedint	nz	1
+unsignedint	nx	101
+unsignedint	nx_fict	1
 double	CFL	0.5
-double	t_end	1.0
-E_BOUNDARY_TYPE	type	IN	0
-E_BOUNDARY_TYPE	type	OUT	1
+unsignedint	nt	100
+test	ilya_was_here	TEST1
+double	gamma	1.4
 double	g_x	9.81
-double	g_y	0.0
-double	g_z	0.0
 unsignedint	nt_write	1
 string	write_file	result.txt

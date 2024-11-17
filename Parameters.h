@@ -8,45 +8,55 @@
 #include <map>
 #include <vector>
 #include "auxiliary_functions.h"
-#include "BoundaryType.h"
+#include "Wall.h"
 
-static std::map<std::string, E_BOUNDARY_TYPE> wall_type_map = {
-	{"IN", IN},
-	{"OUT", OUT},
-	{"FREE_FLUX", FREE_FLUX},
-	{"WALL", WALL},
-	{"SYM", SYM},
-	{"PERIODIC", PERIODIC},
-	{"NO_REF", NO_REF}
+const double R = 8.31;
+
+enum test_preset {
+	TEST_CUSTOM,
+	TEST1,
+	TEST2,
+	TEST3,
+	TEST4
 };
 
+enum IC_preset {
+	IC_CUSTOM,
+	IC_TEST1,
+	IC_TEST2,
+	IC_TEST3,
+	IC_TEST4
+};
 
-class Parameters {
+enum VISC_types {
+	VISC_NONE,
+	VISC_NEUMAN,
+	VISC_LATTER // idk
+};
 
-public:
-	double g_x, g_y, g_z;
+struct Parameters {
+	double g_x;
 	double x_start, x_end;
-	double y_start, y_end;
-	double z_start, z_end;
-    unsigned int nx, ny, nz;
+	unsigned int nx; // amount of x ceils
+	double dx;
+	unsigned int nx_fict;
+	unsigned int nx_all;
 	double CFL;
-	double t_end;
-	double dt;
-	unsigned int n_walls;
-	std::vector<E_BOUNDARY_TYPE> wall_type;
+	unsigned int nt;
+	test_preset test;
+	Wall walls[2]; // only 2 walls for 1D situation
+	IC_preset ic_preset;
+	VISC_types viscosity;
 
-    double gamma = 1.4;
-    double R = 8.31;
-    double Cv = R/(gamma-1);
-    double Cp = gamma*Cv;
+	double gamma;
+	double Cv;
+	double Cp;
 
-	float t_write;
 	unsigned int nt_write;
 	std::string write_file;
 
 	Parameters(std::string);
-	inline void print_g_x() const {std::cout << g_x << std::endl;}
-	inline void print_write_file() const {std::cout << write_file << std::endl;}
+	Parameters(const Parameters& rhs);
 };
 
 #endif
