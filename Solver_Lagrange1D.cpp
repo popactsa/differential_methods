@@ -1,5 +1,6 @@
 #include "Solver_Lagrange1D.h"
 #include <cmath>
+#include <fstream>
 Solver_Lagrange1D::Solver_Lagrange1D(const Parameters& _par):
     par(_par)
 {
@@ -77,6 +78,16 @@ void Solver_Lagrange1D::apply_boundary_conditions()
         v[par.nx_fict] = -2.0;
         v[par.nx_all - par.nx_fict] = 2.0;
     }
+    else if(par.ic_preset == IC_TEST3)
+    {
+        v[par.nx_fict] = 0.0;
+        v[par.nx_all - par.nx_fict] = 0.0;
+    }
+    else if(par.ic_preset == IC_TEST4)
+    {
+        v[par.nx_fict] = 0.0;
+        v[par.nx_all - par.nx_fict] = 0.0;
+    }
     else
     {
         std::cerr << "For nx_fict = " << par.nx_fict << " bc is not specified" << std::endl;
@@ -98,8 +109,8 @@ void Solver_Lagrange1D::solve_step()
 {
     get_time_step();
     apply_boundary_conditions();
-    double* v_last = new double[par.nx_all];
-    for(unsigned int i = 0; i < par.nx_all; i++)
+    double* v_last = new double[par.nx_all+1];
+    for(unsigned int i = 0; i < par.nx_all + 1; i++)
     {
         v_last[i] = v[i];
     }
@@ -113,12 +124,12 @@ void Solver_Lagrange1D::solve_step()
     else if (par.viscosity == VISC_NEUMAN)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
-            omega[i] = mu0*rho[i]*fabs(v[i+1] - v[i])*(v[i+1] - v[i]);
+            omega[i] = -mu0*rho[i]*fabs(v[i+1] - v[i])*(v[i+1] - v[i]);
     }
     else if (par.viscosity == VISC_LATTER)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
-            omega[i] = ((v[i+1] - v[i]) < 0.0) ? mu0*rho[i]*(v[i+1] - v[i])*(v[i+1] - v[i]) : 0;
+            omega[i] = ((v[i+1] - v[i]) < 0.0) ? mu0*rho[i]*(v[i+1] - v[i])*(v[i+1] - v[i]) : 0.0;
     }
     else
     {
@@ -146,8 +157,16 @@ void Solver_Lagrange1D::solve_step()
     for (unsigned int i = par.nx_fict; i < par.nx_all - par.nx_fict; ++i)
     {
         rho[i] = rho[i] / (rho[i] * (v[i + 1] - v[i]) * dt / m[i] + 1.0);
-        // U[i] = U[i] / (rho[i] * (v[i + 1] - v[i]) * (par.gamma - 1.0) * dt / m[i] + 1.0);
-        U[i] = U[i] - (v[i+1]*pc[i+1] - v[i]*pc[i])*dt/m[i] + (v_last[i+1] - v_last[i])*(v_last[i+1] - v_last[i])/8.0 - (v[i+1] - v[i])*(v[i+1] - v[i])/8.0;
+	  if (par.is_conservative == false) U[i] = U[i] / (rho[i] * (v[i + 1] - v[i]) * (par.gamma - 1.0) * dt / m[i] + 1.0);
+	  else
+	  {
+		  double U_temp = U[i];
+			U[i] = U[i] - (v[i+1]*pc[i+1] - v[i]*pc[i])*dt/m[i] + (v_last[i+1] - v_last[i])*(v_last[i+1] - v_last[i])/8.0 - (v[i+1] - v[i])*(v[i+1] - v[i])/8.0;
+		  if (U[i] < 0.0)
+		  {
+			  U[i] = U_temp / (rho[i] * (v[i + 1] - v[i]) * (par.gamma - 1.0) * dt / m[i] + 1.0);
+		  }
+	  }
     };
     delete[] pc;
     delete[] v_last;
@@ -199,6 +218,57 @@ void Solver_Lagrange1D::set_initial_conditions()
             else
             {
                 v[i] = 2.0;
+            };
+            x[i] = par.x_start - par.nx_fict * par.dx + i * par.dx;
+        };
+    }
+    else if (par.ic_preset == IC_TEST3)
+    {
+        for (unsigned int i = 0; i < par.nx_all; ++i)
+        {	
+            if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
+		{
+            	p[i] = 1000.0;
+            	rho[i] = 1.0;
+		}
+		else
+		{
+			p[i] =  0.01;
+			rho[i] = 1.0;
+		}
+            U[i] = p[i] / (par.gamma - 1.0) / rho[i];
+        };
+        for (unsigned int i = 0; i < par.nx_all + 1; ++i)
+        {
+            v[i] = 0.0;
+            x[i] = par.x_start - par.nx_fict * par.dx + i * par.dx;
+        };
+    }
+    else if (par.ic_preset == IC_TEST4)
+    {
+        for (unsigned int i = 0; i < par.nx_all; ++i)
+        {	
+            if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
+		{
+            	p[i] = 0.01;
+            	rho[i] = 1.0;
+		}
+		else
+		{
+			p[i] =  100.0;
+			rho[i] = 1.0;
+		}
+            U[i] = p[i] / (par.gamma - 1.0) / rho[i];
+        };
+        for (unsigned int i = 0; i < par.nx_all + 1; ++i)
+        {
+            if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
+            {
+                v[i] = 0.0;
+            }
+            else
+            {
+                v[i] = 0.0;
             };
             x[i] = par.x_start - par.nx_fict * par.dx + i * par.dx;
         };

@@ -13,7 +13,8 @@ Parameters::Parameters(std::string file_name) {
 		{"nt", &nt},
 		{"nt_write", &nt_write},
 		{"write_file", &write_file},
-		{"gamma", &gamma}
+		{"gamma", &gamma},
+		{"is_conservative", &is_conservative}
 	};
 	std::map<std::string, E_BOUNDARY_TYPE> wall_type_map = {
 		{"WALL", WALL},
@@ -37,13 +38,14 @@ Parameters::Parameters(std::string file_name) {
 		{"IC_TEST4", IC_TEST4}
 	};
 	std::map<std::string, VISC_types> VISC_type_map = {
+		{"VISC_NONE", VISC_NONE},
 		{"VISC_NEUMAN", VISC_NEUMAN},
 		{"VISC_LATTER", VISC_LATTER}
 	};
 
 	test = TEST_CUSTOM;
 	ic_preset = IC_CUSTOM;
-	viscosity = VISC_LATTER;
+	viscosity = VISC_NONE;
 	for (unsigned int i = 0; i < 2; ++i) walls[i].bc_preset = BC_CUSTOM;
 	if (fin.is_open()) {
 		std::string line;
@@ -57,61 +59,65 @@ Parameters::Parameters(std::string file_name) {
 			get_next_substr_between_sep(var_name, line, sep, curr_sep_pos);
 			get_next_substr_between_sep(var_value, line, sep, curr_sep_pos);
 			if (strcmp(var_type.c_str(), "double") == 0)
-            {
-				*(double*)vars[var_name] = std::stod(var_value);
-		    }
-            else if (strcmp(var_type.c_str(), "unsignedint") == 0)
-            {
-		    		*(unsigned int*)vars[var_name] = std::stoi(var_value);
-		    }
-
-            else if (strcmp(var_type.c_str(), "wall") == 0)
-            { // specific wall_type case
-				get_next_substr_between_sep(args_control, line, sep, curr_sep_pos);
-		    }
-
-            else if (strcmp(var_type.c_str(), "Initial") == 0) { // specific initial_condition case
-				ic_preset = IC_type_map[var_value];
+            	{
+					*(double*)vars[var_name] = std::stod(var_value);
+			    }
+			else if (strcmp(var_type.c_str(), "bool") == 0)
+			{
+				*(bool*)vars[var_name] = std::stoi(var_value);
 			}
+            	else if (strcmp(var_type.c_str(), "unsignedint") == 0)
+            	{
+			    		*(unsigned int*)vars[var_name] = std::stoi(var_value);
+			    }
 
-            else if (strcmp(var_type.c_str(), "VISC_types") == 0) { // specific viscosity case
-				viscosity = VISC_type_map[var_value];
-			}
+            	else if (strcmp(var_type.c_str(), "wall") == 0)
+            	{ // specific wall_type case
+					get_next_substr_between_sep(args_control, line, sep, curr_sep_pos);
+			    }
 
-            else if (strcmp(var_type.c_str(), "test") == 0) { // specific test_preset case
-				test = test_preset_type_map[var_value];
-			}
+            	else if (strcmp(var_type.c_str(), "Initial") == 0) { // specific initial_condition case
+					ic_preset = IC_type_map[var_value];
+				}
 
-            else if (strcmp(var_type.c_str(), "string") == 0) {
-				*(std::string*)vars[var_name] = var_value;
-			}
+            	else if (strcmp(var_type.c_str(), "VISC_types") == 0) { // specific viscosity case
+					viscosity = VISC_type_map[var_value];
+				}
 
-            else {
-				std::cerr << "Variable type is not identified: " << var_name << " " << var_type << std::endl;
-				exit(1);
-			}
+            	else if (strcmp(var_type.c_str(), "test") == 0) { // specific test_preset case
+					test = test_preset_type_map[var_value];
+				}
 
-            if (strcmp(args_control.c_str(), "{") == 0) { // assign wall values if provided
-				std::string opening, arg_name, arg_value;
-				for (std::getline(fin, line);; std::getline(fin, line)) {
-					curr_sep_pos = 0;
-					get_next_substr_between_sep(opening, line, sep, curr_sep_pos);
-					if (strcmp(opening.c_str(), "}") == 0) break;
-					get_next_substr_between_sep(arg_name, line, sep, curr_sep_pos);
-					get_next_substr_between_sep(arg_value, line, sep, curr_sep_pos);
-					if (strcmp(var_type.c_str(), "wall") == 0) {
-							if (arg_name == "type") walls[std::stoul(var_value)].type = wall_type_map[arg_value];
-							else if (arg_name == "T") walls[std::stoul(var_value)].T = std::stod(arg_value);
-							else if (arg_name == "v_x") walls[std::stoul(var_value)].v_x = std::stod(arg_value);
-							else {
-								std::cerr << "Wall " << var_value << " arg type not found (" << arg_name << ")" << std::endl;
-								exit(1);
-							}
-							std::cout << "Wall " << var_value << " : " << arg_name << "," << arg_value << std::endl;
+            	else if (strcmp(var_type.c_str(), "string") == 0) {
+					*(std::string*)vars[var_name] = var_value;
+				}
+
+            	else {
+					std::cerr << "Variable type is not identified: " << var_name << " " << var_type << std::endl;
+					exit(1);
+				}
+
+            	if (strcmp(args_control.c_str(), "{") == 0) { // assign wall values if provided
+					std::string opening, arg_name, arg_value;
+					for (std::getline(fin, line);; std::getline(fin, line)) {
+						curr_sep_pos = 0;
+						get_next_substr_between_sep(opening, line, sep, curr_sep_pos);
+						if (strcmp(opening.c_str(), "}") == 0) break;
+						get_next_substr_between_sep(arg_name, line, sep, curr_sep_pos);
+						get_next_substr_between_sep(arg_value, line, sep, curr_sep_pos);
+						if (strcmp(var_type.c_str(), "wall") == 0) {
+								if (arg_name == "type") walls[std::stoul(var_value)].type = wall_type_map[arg_value];
+								else if (arg_name == "T") walls[std::stoul(var_value)].T = std::stod(arg_value);
+								else if (arg_name == "v_x") walls[std::stoul(var_value)].v_x = std::stod(arg_value);
+								else {
+									std::cerr << "Wall " << var_value << " arg type not found (" << arg_name << ")" << std::endl;
+									exit(1);
+								}
+								std::cout << "Wall " << var_value << " : " << arg_name << "," << arg_value << std::endl;
+						}
 					}
 				}
-			}
-		std::cout << var_type << " " << var_name << " " << var_value << std::endl;
+			std::cout << var_type << " " << var_name << " " << var_value << std::endl;
 		}
 		dx = (x_end - x_start) / nx;
 		nx_all = nx + 2 * nx_fict;
@@ -147,6 +153,7 @@ Parameters::Parameters(const Parameters& rhs):
 	test(rhs.test),
 	ic_preset(rhs.ic_preset),
 	viscosity(rhs.viscosity),
+	is_conservative(rhs.is_conservative),
 	gamma(rhs.gamma),
 	Cv(rhs.Cv),
 	Cp(rhs.Cp),

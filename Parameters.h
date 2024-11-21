@@ -47,6 +47,7 @@ struct Parameters {
 	Wall walls[2]; // only 2 walls for 1D situation
 	IC_preset ic_preset;
 	VISC_types viscosity;
+	bool is_conservative;
 
 	double gamma;
 	double Cv;
