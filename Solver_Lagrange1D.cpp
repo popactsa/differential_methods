@@ -50,51 +50,41 @@ Solver_Lagrange1D::~Solver_Lagrange1D()
 void Solver_Lagrange1D::apply_boundary_conditions()
 {
     // velocity
-    /*for (unsigned int i = 0; i < 2; ++i)   // 1D -> 2 walls
+    for (unsigned int i = 0; i < 2; ++i)   // 1D -> 2 walls
     {
-        if (par.walls[i].bc_preset == BC_TEST1 || par.walls[i].bc_preset == BC_TEST2)
+        if (par.walls[i].type == WALL)
         {
-            v[par.nx_fict] = 0.0;
-            v[par.nx_all - par.nx_fict] = 0.0;
-            if (par.nx_fict == 1)
+            if(par.ic_preset == IC_TEST1 || par.ic_preset == IC_TEST3  || par.ic_preset == IC_TEST4 )
             {
-                v[0] = -v[2] + 2 * v[1];
-                v[par.nx_all] = -v[par.nx_all - 2] + 2 * v[par.nx_all - 1];
+                v[par.nx_fict] = 0.0;
+                v[par.nx_all - par.nx_fict] = 0.0;
+            }
+            else if(par.ic_preset == IC_TEST2)
+            {
+                v[par.nx_fict] = -2.0;
+                v[par.nx_all - par.nx_fict] = 2.0;
             }
             else
             {
                 std::cerr << "For nx_fict = " << par.nx_fict << " bc is not specified" << std::endl;
                 exit(1);
             };
-        };
-    };*/
-    if(par.ic_preset == IC_TEST1)
-    {
-        v[par.nx_fict] = 0.0;
-        v[par.nx_all - par.nx_fict] = 0.0;
-    }
-    else if(par.ic_preset == IC_TEST2)
-    {
-        v[par.nx_fict] = -2.0;
-        v[par.nx_all - par.nx_fict] = 2.0;
-    }
-    else if(par.ic_preset == IC_TEST3)
-    {
-        v[par.nx_fict] = 0.0;
-        v[par.nx_all - par.nx_fict] = 0.0;
-    }
-    else if(par.ic_preset == IC_TEST4)
-    {
-        v[par.nx_fict] = 0.0;
-        v[par.nx_all - par.nx_fict] = 0.0;
-    }
-    else
-    {
-        std::cerr << "For nx_fict = " << par.nx_fict << " bc is not specified" << std::endl;
-        exit(1);
+            int i_temp = 0;
+            if(i)
+                i_temp = par.nx_all;
+            v[i_temp] = -v[i_temp+(1-2*i)*2] + 2.0 * v[i_temp+(1-2*i)*1];
+            // v[0] = -v[2] + 2.0 * v[1];
+            // v[par.nx_all] = -v[par.nx_all - 2] + 2.0 * v[par.nx_all - 1];
+        }
+        else if (par.walls[i].type == FLUX)
+        {
+            int i_temp = 0;
+            if(i)
+                i_temp = par.nx_all;
+            v[i_temp] = v[i_temp+(1-2*i)*2];
+            v[i_temp+(1-2*i)*1] = v[i_temp+(1-2*i)*2];
+        }
     };
-    v[0] = -v[2] + 2.0 * v[1];
-    v[par.nx_all] = -v[par.nx_all - 2] + 2.0 * v[par.nx_all - 1];
     // density and internal energy
     for (unsigned int i = 0; i < par.nx_fict; ++i)
     {
@@ -107,8 +97,8 @@ void Solver_Lagrange1D::apply_boundary_conditions()
 
 void Solver_Lagrange1D::solve_step()
 {
-    get_time_step();
     apply_boundary_conditions();
+    get_time_step();
     double* v_last = new double[par.nx_all+1];
     for(unsigned int i = 0; i < par.nx_all + 1; i++)
     {
@@ -147,7 +137,7 @@ void Solver_Lagrange1D::solve_step()
     {
         x[i] += v[i] * dt;
     };
-    // pressure at the bounaries for conservative law
+    // pressure at the boundaries for conservative law
     double* pc = new double[par.nx_all];
     for(unsigned int i = 1; i < par.nx_all; i++)
     {
@@ -157,16 +147,17 @@ void Solver_Lagrange1D::solve_step()
     for (unsigned int i = par.nx_fict; i < par.nx_all - par.nx_fict; ++i)
     {
         rho[i] = rho[i] / (rho[i] * (v[i + 1] - v[i]) * dt / m[i] + 1.0);
-	  if (par.is_conservative == false) U[i] = U[i] / (rho[i] * (v[i + 1] - v[i]) * (par.gamma - 1.0) * dt / m[i] + 1.0);
-	  else
-	  {
-		  double U_temp = U[i];
-			U[i] = U[i] - (v[i+1]*pc[i+1] - v[i]*pc[i])*dt/m[i] + (v_last[i+1] - v_last[i])*(v_last[i+1] - v_last[i])/8.0 - (v[i+1] - v[i])*(v[i+1] - v[i])/8.0;
-		  if (U[i] < 0.0)
-		  {
-			  U[i] = U_temp / (rho[i] * (v[i + 1] - v[i]) * (par.gamma - 1.0) * dt / m[i] + 1.0);
-		  }
-	  }
+        if (par.is_conservative == false)
+            U[i] = U[i] / (rho[i] * (v[i + 1] - v[i]) * (par.gamma - 1.0) * dt / m[i] + 1.0);
+        else
+        {
+            double U_temp = U[i];
+            U[i] = U[i] - (v[i+1]*pc[i+1] - v[i]*pc[i])*dt/m[i] + (v_last[i+1] + v_last[i])*(v_last[i+1] + v_last[i])/8.0 - (v[i+1] + v[i])*(v[i+1] + v[i])/8.0;
+            if (U[i] < 0.0)
+            {
+                U[i] = U_temp / (rho[i] * (v[i + 1] - v[i]) * (par.gamma - 1.0) * dt / m[i] + 1.0);
+            }
+        }
     };
     delete[] pc;
     delete[] v_last;
@@ -174,6 +165,7 @@ void Solver_Lagrange1D::solve_step()
     for (unsigned int i = 0; i < par.nx_all; ++i)
     {
         p[i] = rho[i] * (par.gamma - 1.0) * U[i];
+        // std::cout << "p " << p[i] << std::endl;
     };
 };
 
@@ -225,17 +217,17 @@ void Solver_Lagrange1D::set_initial_conditions()
     else if (par.ic_preset == IC_TEST3)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
-        {	
+        {
             if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
-		{
-            	p[i] = 1000.0;
-            	rho[i] = 1.0;
-		}
-		else
-		{
-			p[i] =  0.01;
-			rho[i] = 1.0;
-		}
+            {
+                p[i] = 1000.0;
+                rho[i] = 1.0;
+            }
+            else
+            {
+                p[i] =  0.01;
+                rho[i] = 1.0;
+            }
             U[i] = p[i] / (par.gamma - 1.0) / rho[i];
         };
         for (unsigned int i = 0; i < par.nx_all + 1; ++i)
@@ -247,17 +239,17 @@ void Solver_Lagrange1D::set_initial_conditions()
     else if (par.ic_preset == IC_TEST4)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
-        {	
+        {
             if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
-		{
-            	p[i] = 0.01;
-            	rho[i] = 1.0;
-		}
-		else
-		{
-			p[i] =  100.0;
-			rho[i] = 1.0;
-		}
+            {
+                p[i] = 0.01;
+                rho[i] = 1.0;
+            }
+            else
+            {
+                p[i] =  100.0;
+                rho[i] = 1.0;
+            }
             U[i] = p[i] / (par.gamma - 1.0) / rho[i];
         };
         for (unsigned int i = 0; i < par.nx_all + 1; ++i)
@@ -293,6 +285,7 @@ void Solver_Lagrange1D::get_time_step()
         if (dt_temp < min_dt) min_dt = dt_temp;
     }
     dt = min_dt; // what's going on????????
+    // std::cout << "dt = " << dt << std::endl;
 }
 
 void Solver_Lagrange1D::write_data()
@@ -300,14 +293,17 @@ void Solver_Lagrange1D::write_data()
     std::string file_name = "data/" + std::to_string(step) + ".csv";
     std::ofstream file(file_name);
     double* x_grid = new double[par.nx_all];
+    double* v_grid = new double[par.nx_all];
     for(unsigned int i = 0; i < par.nx_all; i++)
     {
         x_grid[i] = 0.5*(x[i+1] + x[i]);
+        v_grid[i] = 0.5*(v[i+1] + v[i]);
     }
     double* c = rho;
     for(int i = par.nx_fict; i < par.nx_all - par.nx_fict; i++)
     {
-        file << x_grid[i] << " " << rho[i]  << " " << p[i] << "\n";
+        file << x_grid[i] << " " << rho[i]  << " " << p[i] << " " << v_grid[i] << "\n";
     }
     delete[] x_grid;
+    delete[] v_grid;
 }

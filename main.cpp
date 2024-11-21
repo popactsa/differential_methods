@@ -10,5 +10,8 @@ int main()
 	Parameters par(file_name); // Parameters initialization by file;
 	Solver_Lagrange1D solver(par);
 	system("python Post.py");
-	system("sxiv graph.png");
+#ifdef WIN32
+#else
+    system("sxiv graph.png");
+#endif // WIN32
 }
