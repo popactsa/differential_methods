@@ -14,7 +14,8 @@ Parameters::Parameters(std::string file_name) {
 		{"nt_write", &nt_write},
 		{"write_file", &write_file},
 		{"gamma", &gamma},
-		{"is_conservative", &is_conservative}
+		{"is_conservative", &is_conservative},
+		{"mu0", &mu0}
 	};
 	std::map<std::string, E_BOUNDARY_TYPE> wall_type_map = {
 		{"WALL", WALL},
@@ -40,7 +41,9 @@ Parameters::Parameters(std::string file_name) {
 	std::map<std::string, VISC_types> VISC_type_map = {
 		{"VISC_NONE", VISC_NONE},
 		{"VISC_NEUMAN", VISC_NEUMAN},
-		{"VISC_LATTER", VISC_LATTER}
+		{"VISC_LATTER", VISC_LATTER},
+		{"VISC_LINEAR", VISC_LINEAR},
+		{"VISC_SUM", VISC_SUM}
 	};
 
 	test = TEST_CUSTOM;
@@ -127,7 +130,7 @@ Parameters::Parameters(std::string file_name) {
 			ic_preset = IC_preset(test);
 			for (unsigned int i = 0; i < 2; ++i) {
 				walls[i].bc_preset = BC_preset(test); // it's easier to specify further boundary values in solver,
-										  // than to add many elif cases here
+										  // than to add many elif cases here //
 										  // assigned boundary values don't matter
 										  // i'm sorry
 			};
@@ -153,6 +156,7 @@ Parameters::Parameters(const Parameters& rhs):
 	test(rhs.test),
 	ic_preset(rhs.ic_preset),
 	viscosity(rhs.viscosity),
+	mu0(rhs.mu0),	
 	is_conservative(rhs.is_conservative),
 	gamma(rhs.gamma),
 	Cv(rhs.Cv),

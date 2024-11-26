@@ -5,7 +5,7 @@ unsignedint	nx_fict	1
 double	CFL	0.5
 unsignedint	nt	100
 bool	is_conservative	1
-VISC_types	banana	VISC_LATTER
+VISC_types	banana	VISC_NEUMAN
 Initial	banana	IC_TEST2
 wall	banana	0	{
 	type	FLUX
@@ -17,3 +17,4 @@ double	gamma	1.4
 double	g_x	9.81
 unsignedint	nt_write	1
 string	write_file	result.txt
+double	mu0	1.0

@@ -121,6 +121,20 @@ void Solver_Lagrange1D::solve_step()
         for (unsigned int i = 0; i < par.nx_all; ++i)
             omega[i] = ((v[i+1] - v[i]) < 0.0) ? mu0*rho[i]*(v[i+1] - v[i])*(v[i+1] - v[i]) : 0.0;
     }
+    else if (par.viscosity == VISC_LINEAR)
+    {
+        for (unsigned int i = 0; i < par.nx_all; ++i)
+	  {
+            omega[i] = mu0 * rho[i] * (v[i + 1] - v[i]) * m[i];
+	  }
+    }
+    else if (par.viscosity == VISC_SUM)
+    {
+        for (unsigned int i = 0; i < par.nx_all; ++i)
+	  {
+            omega[i] = mu0 * rho[i] * (v[i + 1] - v[i]) * m[i] - mu0 * rho[i]*fabs(v[i+1] - v[i])*(v[i+1] - v[i]);
+	  }
+    }
     else
     {
         std::cerr << "Viscosity is not set: " << par.viscosity << std::endl;
@@ -137,7 +151,7 @@ void Solver_Lagrange1D::solve_step()
     {
         x[i] += v[i] * dt;
     };
-    // pressure at the boundaries for conservative law
+    ////// pressure at the boundaries for conservative law
     double* pc = new double[par.nx_all];
     for(unsigned int i = 1; i < par.nx_all; i++)
     {

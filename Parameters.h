@@ -31,7 +31,9 @@ enum IC_preset {
 enum VISC_types {
 	VISC_NONE,
 	VISC_NEUMAN,
-	VISC_LATTER // idk
+	VISC_LATTER,
+	VISC_LINEAR,
+	VISC_SUM
 };
 
 struct Parameters {
@@ -48,6 +50,7 @@ struct Parameters {
 	IC_preset ic_preset;
 	VISC_types viscosity;
 	bool is_conservative;
+	double mu0;
 
 	double gamma;
 	double Cv;

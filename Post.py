@@ -8,7 +8,7 @@ data = pd.read_csv(file_name, sep = ' ', header=None)
 
 # print(data)
 
-fig, ax = plt.subplots(1, 3, figsize = (4, 3), dpi = 200);
+fig, ax = plt.subplots(1, 3, figsize = (9*1.5, 6), dpi = 200);
 ax[0].plot(data.iloc[:, 0], data.iloc[:, 1], 'o-', lw = 1, markersize = 3, label = "плотность")
 ax[0].title.set_text(f'Step = {step}')
 ax[0].legend(fontsize=6.0)
@@ -21,5 +21,5 @@ ax[2].plot(data.iloc[:, 0], data.iloc[:, 3], 'o-', lw = 1, markersize = 3, label
 ax[2].title.set_text(f'Step = {step}')
 ax[2].legend(fontsize=6.0)
 ax[2].grid()
-# plt.savefig("graph")
-plt.show()
+plt.savefig("graph")
+# plt.show()
