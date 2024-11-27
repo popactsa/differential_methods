@@ -6,4 +6,10 @@
 
 data/*.csv
 
-'~'/*
+object_files/*
+
+source/~/*
+
+headers/~/*
+
+~/.vim/*

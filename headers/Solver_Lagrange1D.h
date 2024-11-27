@@ -6,7 +6,6 @@
 
 class Solver_Lagrange1D: public iSolver {
 	const Parameters par;
-	double mu0 = 1.0;
 	double *p, *rho, *U, *m;
 	double *v, *x;
 	double t, dt;
