@@ -1,16 +1,33 @@
-SLATEC 	= $(wildcard ./*.cpp)
-SLATEC_OBJ = $(addprefix ./,$(notdir $(SLATEC:.cpp=.o)))
+TARGET = main
 
-FLAGS = -O1
-FCOMP = g++
+.PHONY: all clean print
 
-all: main
+CPP = g++
 
-main: $(SLATEC_OBJ)
-	$(FCOMP) $(FLAGS) -o main *.o
+S_DIR = ./source
 
-%.o: %.cpp
-	$(FCOMP) $(FLAGS) -c $<
+H_DIR = ./headers
+
+O_DIR = ./object_files
+
+SRCS = $(shell find $(S_DIR) | grep ".cpp" | head -n -1)
+
+OBJS = $(SRCS:$(S_DIR)%.cpp=$(O_DIR)%.o)
+
+INC_FLAGS = $(addprefix -I,$(H_DIR))
+
+CFLAGS = $(INC_FLAGS) -O1
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CPP) $(OBJS) -o $@
+
+$(O_DIR)/%.o: $(S_DIR)/%.cpp
+	$(CPP) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f *.o
+	rm -rf $(O_DIR)/* $(TARGET)
+
+print:
+	echo $(SRCS)

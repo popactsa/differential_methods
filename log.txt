@@ -1,0 +1,5 @@
+g++ -I./headers -O1 -c source/auxiliary_functions.cpp -o object_files/auxiliary_functions.o
+g++ -I./headers -O1 -c source/Solver_Lagrange1D.cpp -o object_files/Solver_Lagrange1D.o
+g++ -I./headers -O1 -c source/Parameters.cpp -o object_files/Parameters.o
+g++ -I./headers -O1 -c source/main.cpp -o object_files/main.o
+g++ -I./headers -O1 -c source/~/.vim/undo/%home%popactsa%edu%differential_methods%gd%source%Solver_Lagrange1D.cpp -o object_files/~/.vim/undo/%home%popactsa%edu%differential_methods%gd%source%Solver_Lagrange1D.o
