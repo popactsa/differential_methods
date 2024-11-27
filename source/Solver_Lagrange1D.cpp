@@ -99,7 +99,7 @@ void Solver_Lagrange1D::solve_step()
 {
     apply_boundary_conditions();
     get_time_step();
-    double* v_last = new double[par.nx_all+1];
+    double v_last[par.nx_all + 1];
     for(unsigned int i = 0; i < par.nx_all + 1; i++)
     {
         v_last[i] = v[i];
@@ -152,7 +152,7 @@ void Solver_Lagrange1D::solve_step()
         x[i] += v[i] * dt;
     };
     ////// pressure at the boundaries for conservative law
-    double* pc = new double[par.nx_all];
+    double pc[par.nx_all];
     for(unsigned int i = 1; i < par.nx_all; i++)
     {
         pc[i] = 0.5*(p[i] + omega[i] + p[i-1] + omega[i-1]);
@@ -173,8 +173,6 @@ void Solver_Lagrange1D::solve_step()
             }
         }
     };
-    delete[] pc;
-    delete[] v_last;
     // pressure
     for (unsigned int i = 0; i < par.nx_all; ++i)
     {
@@ -306,8 +304,8 @@ void Solver_Lagrange1D::write_data()
 {
     std::string file_name = "data/" + std::to_string(step) + ".csv";
     std::ofstream file(file_name);
-    double* x_grid = new double[par.nx_all];
-    double* v_grid = new double[par.nx_all];
+    double x_grid[par.nx_all];
+    double v_grid[par.nx_all];
     for(unsigned int i = 0; i < par.nx_all; i++)
     {
         x_grid[i] = 0.5*(x[i+1] + x[i]);
@@ -318,6 +316,4 @@ void Solver_Lagrange1D::write_data()
     {
         file << x_grid[i] << " " << rho[i]  << " " << p[i] << " " << v_grid[i] << "\n";
     }
-    delete[] x_grid;
-    delete[] v_grid;
 }
