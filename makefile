@@ -10,9 +10,9 @@ H_DIR = ./headers
 
 O_DIR = ./object_files
 
-SRCS = $(shell find $(S_DIR) | grep ".cpp" | head -n -1)
+SRCS = $(shell ls -a $(S_DIR) | sort | tail -n +4)
 
-OBJS = $(SRCS:$(S_DIR)%.cpp=$(O_DIR)%.o)
+OBJS = $(SRCS:%.cpp=$(O_DIR)/%.o)
 
 INC_FLAGS = $(addprefix -I,$(H_DIR))
 
@@ -30,4 +30,4 @@ clean:
 	rm -rf $(O_DIR)/* $(TARGET)
 
 print:
-	echo $(SRCS)
+	echo $(OBJS)
