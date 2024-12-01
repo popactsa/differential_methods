@@ -243,7 +243,7 @@ void Solver_Godunov1D::solve_step()
             // TODO переписать в виде вызова функции 'newton_iteration'
             if (p_s <= p_l) // Волна разрежения
             {
-                fl = 2 * c_l / (par.gamma - 1) * (pow(p_s / p_l, ((par.gamma - 1) / 2 / par.gamma)) - 1);
+                fl = 2 * c_l / (par.gamma - 1) * (pow(p_s / p_l, (par.gamma - 1) / 2 / par.gamma) - 1);
                 dfl = c_l / par.gamma * pow(p_s / p_l, (par.gamma - 1) / 2 / par.gamma - 1) / p_l;
             }
 
@@ -272,7 +272,7 @@ void Solver_Godunov1D::solve_step()
             p_s = p_s - (fl + fr - (u_l - u_r)) / (dfl + dfr);
 
             
-            if (p_s <= 0.0)
+            if (p_s < 0.0)
             {
                 p_s = 1e-6;
                 break;
@@ -664,21 +664,23 @@ void Solver_Godunov1D::write_data()
     
 
     //double x_grid[par.nx_all];
-    double u[par.nx_all];
+    double rho_out[par.nx];
+    double u_out[par.nx];
+    double int_e_out[par.nx];
+    double p_out[par.nx];
+    double x_out[par.nx];
     
 
-    for(unsigned int i = 0; i < par.nx_all; i++)
+    for(unsigned int i = 0; i < par.nx; i++)
     {
-         
-         u[i] = rho_u[i] / rho[i];
-    }
-     
+        rho_out[i] = rho[par.nx_fict + i];
+        u_out[i] = rho_u[par.nx_fict + i] / rho_out[i];
+        p_out[i] = p[par.nx_fict + i];
+        int_e_out[i] = rho_e[par.nx_fict + i] / rho_out[i] - pow(u_out[i], 2) / 2.0;
+        x_out[i] = x[par.nx_fict + i];
 
-    //double* c = rho;
-    
+        file << x_out[i] << " " << rho_out[i]  << " " << u_out[i] << " " << p_out[i] << "\n";
 
-    for(int i = par.nx_fict; i < par.nx_all - par.nx_fict; i++)
-    {
-        file << x[i] << " " << rho[i]  << " " << p[i] << " " << u[i] << "\n";
     }
+    //double* c = rho;    
 }

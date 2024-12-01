@@ -6,7 +6,7 @@ double	CFL	0.5
 unsignedint	nt	100
 bool	is_conservative	1
 VISC_types	banana	VISC_NEUMAN
-Initial	banana	IC_TEST2
+Initial	banana	IC_TEST1
 wall	banana	0	{
 	type	FLUX
 }
