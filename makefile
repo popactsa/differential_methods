@@ -10,7 +10,7 @@ H_DIR = ./headers
 
 O_DIR = ./object_files
 
-SRCS = $(shell ls -a $(S_DIR) | sort | tail -n +4)
+SRCS = $(shell ls -a $(S_DIR) | sort | tail -n +3)
 
 OBJS = $(SRCS:%.cpp=$(O_DIR)/%.o)
 
