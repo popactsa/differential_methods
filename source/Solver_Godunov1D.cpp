@@ -1,7 +1,7 @@
 #include "Solver_Godunov1D.h"
 #include <cmath>
-#include <iostream>
-#include <string>
+//#include <iostream>
+//#include <string>
 
 
 
@@ -32,13 +32,13 @@ Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
     // Начальные условия
     set_initial_conditions();
     
+
+    t = 0.0;
+
     for (step = 1; step <= par.nt; step++)
     {
         // Решение на текущем шаге
         solve_step();
-
-        // Общее время
-        t += dt;
 
         // Запись в файл
         if (step % par.nt_write == 0)
@@ -165,13 +165,17 @@ void Solver_Godunov1D::apply_boundary_conditions()
 
 void Solver_Godunov1D::solve_step()
 {
-    // Применить граничные условия
-    apply_boundary_conditions();
-    
-
     // Пересчитать шаг по времени
     get_time_step();
-    
+   
+
+    // Общее время
+    t += dt;
+
+
+    // Применить граничные условия
+    apply_boundary_conditions();
+        
 
     // Параметры слева и справа на границе ячеек
     double *rho_left = new double[par.nx + 1];
@@ -229,19 +233,18 @@ void Solver_Godunov1D::solve_step()
     
 
         double p_s = 0.5 * (p_l + p_r);
-
-        double fl, fr;
-        double dfl, dfr;
-
+ 
 
         // Метод Ньютона - получим давление на контактном разрыве
+        double fl, fr;
+        double dfl, dfr;
         for (int k = 0; k < N_iter; ++k)
         {
             // TODO переписать в виде вызова функции 'newton_iteration'
             if (p_s <= p_l) // Волна разрежения
             {
-                fl = 2 * c_l / (par.gamma - 1) * pow(p_s / p_l, ((par.gamma - 1) / 2 / par.gamma) - 1);
-                dfl = c_l / par.gamma * pow(p_s / p_l, ((par.gamma - 1) / 2 / par.gamma - 1) / p_l);
+                fl = 2 * c_l / (par.gamma - 1) * (pow(p_s / p_l, ((par.gamma - 1) / 2 / par.gamma)) - 1);
+                dfl = c_l / par.gamma * pow(p_s / p_l, (par.gamma - 1) / 2 / par.gamma - 1) / p_l;
             }
 
 
@@ -254,8 +257,8 @@ void Solver_Godunov1D::solve_step()
 
             if (p_s <= p_r) // Волна разрежения
             {
-                fr = 2 * c_r / (par.gamma - 1) * pow(p_s / p_r, ((par.gamma - 1) / 2 / par.gamma) - 1);
-                dfr = c_r / par.gamma * pow(p_s / p_r, ((par.gamma - 1) / 2 / par.gamma - 1) / p_r);
+                fr = 2 * c_r / (par.gamma - 1) * (pow(p_s / p_r, (par.gamma - 1) / 2 / par.gamma) - 1);
+                dfr = c_r / par.gamma * pow(p_s / p_r, (par.gamma - 1) / 2 / par.gamma - 1) / p_r;
             }
 
 
@@ -277,13 +280,13 @@ void Solver_Godunov1D::solve_step()
         }
 
         // Волна разрежения
-        if (p_s <= p_l) fl = 2 * c_l / (par.gamma - 1) * pow(p_s / p_l, ((par.gamma - 1) / 2 / par.gamma) - 1);
+        if (p_s <= p_l) fl = 2 * c_l / (par.gamma - 1) * (pow(p_s / p_l, (par.gamma - 1) / 2 / par.gamma) - 1);
 
         // Ударная волна
         else fl = (p_s - p_l) / sqrt(rho_l / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_l));
 
         // Волна разрежения
-        if (p_s <= p_r) fr = 2 * c_r / (par.gamma - 1) * pow(p_s / p_r, ((par.gamma - 1) / 2 / par.gamma) - 1);
+        if (p_s <= p_r) fr = 2 * c_r / (par.gamma - 1) * (pow(p_s / p_r, (par.gamma - 1) / 2 / par.gamma) - 1);
 
         // Ударная волна
         else fr = (p_s - p_r) / sqrt(rho_r / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_r));
@@ -541,15 +544,15 @@ void Solver_Godunov1D::set_initial_conditions()
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
         {
-            if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
+            if (i * par.dx <= 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
             {
                 rho[i] = 1.0;
                 p[i] = 1.0;
             }
             else
             {
-                rho[i] = 0.1;
-                p[i] = 0.125;
+                rho[i] = 0.125;
+                p[i] = 0.1;
             };
             
             rho_e[i] = rho[i] * ((pow(0.0, 2)) / 2.0  + p[i] / (par.gamma - 1.0) / rho[i]);
@@ -565,8 +568,8 @@ void Solver_Godunov1D::set_initial_conditions()
         {
             rho[i] = 1.0;
 
-            if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx) rho_u[i] = rho[i] * (-2.0);
 
+            if (i * par.dx <= 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx) rho_u[i] = rho[i] * (-2.0);
 
             else rho_u[i] = rho[i] * 2.0;
             
@@ -582,15 +585,11 @@ void Solver_Godunov1D::set_initial_conditions()
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
         {
-            if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
-            {
-                p[i] = 1000.0;
-            }
-            else
-            {
-                p[i] = 0.01;
-            };
+            if (i * par.dx <= 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx) p[i] = 1000.0;
+
+            else p[i] = 0.01;
             
+
             rho[i] = 1.0;
             rho_e[i] = rho[i] * ((pow(0.0, 2)) / 2.0  + p[i] / (par.gamma - 1.0) / rho[i]);
             rho_u[i] = rho[i] * 0.0;
@@ -645,7 +644,7 @@ void Solver_Godunov1D::get_time_step()
     double min_dt = 1.0e6;
     for (unsigned int i = 1; i < par.nx_all; ++i)
     {
-        double u = rho_u[i]/rho[i];
+        double u = rho_u[i] / rho[i];
         double c = (rho[i] != 0.0) ? c = std::sqrt(par.gamma * p[i] / rho[i]) : 0.0;
         //double dx = x[i+1] - x[i];
         //double V = 0.5*(v[i+1] + v[i]);
