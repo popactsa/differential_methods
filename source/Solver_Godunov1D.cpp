@@ -206,7 +206,7 @@ void Solver_Godunov1D::solve_step()
 
     
     // Решатель Римана - получим параметры на грани ячейки
-    for (int i = 0; i < par.nx; ++i)
+    for (int i = 1; i < par.nx; ++i)
     {
         int N_iter = 20; // как в Toro, критерия по точности нет
 
