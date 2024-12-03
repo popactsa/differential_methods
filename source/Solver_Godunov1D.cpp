@@ -178,15 +178,15 @@ void Solver_Godunov1D::solve_step()
         
 
     // Параметры слева и справа на границе ячеек
-    double *rho_left = new double[par.nx + 1];
-    double *rho_u_left = new double[par.nx + 1];
-    double *rho_e_left = new double[par.nx + 1];
-    double *p_left = new double[par.nx + 1];
+    double rho_left [par.nx_all + 1];
+    double rho_u_left[par.nx_all + 1];
+    double rho_e_left[par.nx_all + 1];
+    double p_left[par.nx_all + 1];
     
-    double *rho_right = new double[par.nx + 1];
-    double *rho_u_right = new double[par.nx + 1];
-    double *rho_e_right = new double[par.nx + 1];
-    double *p_right = new double[par.nx + 1];
+    double rho_right[par.nx_all + 1];
+    double rho_u_right[par.nx_all + 1];
+    double rho_e_right[par.nx_all + 1];
+    double p_right[par.nx_all + 1];
 
 
     for (int i = 0; i < par.nx; ++i)
@@ -208,7 +208,6 @@ void Solver_Godunov1D::solve_step()
     // Решатель Римана - получим параметры на грани ячейки
     for (int i = 1; i < par.nx; ++i)
     {
-        int N_iter = 20; // как в Toro, критерия по точности нет
 
         double p_l = p_left[i];
         double p_r = p_right[i];
@@ -238,6 +237,7 @@ void Solver_Godunov1D::solve_step()
         // Метод Ньютона - получим давление на контактном разрыве
         double fl, fr;
         double dfl, dfr;
+        int N_iter = 20; // как в Toro, критерия по точности нет
         for (int k = 0; k < N_iter; ++k)
         {
             // TODO переписать в виде вызова функции 'newton_iteration'
@@ -251,15 +251,16 @@ void Solver_Godunov1D::solve_step()
             else // Ударная волна
             {
                 fl = (p_s - p_l) / sqrt(rho_l / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_l));
-                dfl = rho_l / 4 * ((par.gamma + 1) * p_s + (3 * par.gamma + 1) * p_l) / pow(rho_l / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_l), 1.5);
+        int N_iter = 20; // как в Toro, критерия по точности нет
+                dfl = rho_l / 4 * ((par.gamma + 1) * p_s + (3 * par.gamma - 1) * p_l) / pow(rho_l / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_l), 1.5);
             }
 
 
             if (p_s <= p_r) // Волна разрежения
             {
                 fr = 2 * c_r / (par.gamma - 1) * (pow(p_s / p_r, (par.gamma - 1) / 2 / par.gamma) - 1);
-                dfr = c_r / par.gamma * pow(p_s / p_r, (par.gamma - 1) / 2 / par.gamma - 1) / p_r;
-            }
+		    dfr = c_r / par.gamma * pow(p_s / p_r, (par.gamma - 1) / 2 / par.gamma - 1) / p_r;
+		}
 
 
             else // Ударная волна
@@ -324,7 +325,7 @@ void Solver_Godunov1D::solve_step()
                 }
 
 
-                else // Перед контактным разрывом с ад. Гюгонию
+                else // Перед контактным разрывом с ад. Гюгонио
                 {
                     rho_temp = rho_l * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_l) / ((par.gamma - 1) * p_s + (par.gamma + 1) * p_l);
                     u_temp = u_s;
