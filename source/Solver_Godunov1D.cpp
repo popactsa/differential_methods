@@ -2,9 +2,6 @@
 #include <cmath>
 //#include <iostream>
 //#include <string>
-
-
-
 Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
 {
     p = new double[par.nx_all];
@@ -24,6 +21,8 @@ Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
     {
         // Решение на текущем шаге
         solve_step();
+	  if (step % par.nt_write == 0)
+	  	write_data();
     }
     // Конец расчета
     std::cout << "Done" << std::endl;
