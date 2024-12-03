@@ -36,6 +36,13 @@ enum VISC_types {
 	VISC_SUM
 };
 
+enum Reconstruction {
+	Godunov,
+	Kolgan_1972,
+	Kolgan_1975,
+	Osher_1984
+};
+
 struct Parameters {
 	double g_x;
 	double x_start, x_end;
@@ -49,6 +56,7 @@ struct Parameters {
 	Wall walls[2]; // only 2 walls for 1D situation
 	IC_preset ic_preset;
 	VISC_types viscosity;
+	Reconstruction reconstruction;
 	bool is_conservative;
 	double mu0;
 

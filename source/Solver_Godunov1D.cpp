@@ -1,7 +1,6 @@
 #include "Solver_Godunov1D.h"
 #include <cmath>
-//#include <iostream>
-//#include <string>
+
 Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
 {
     p = new double[par.nx_all];
@@ -13,7 +12,6 @@ Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
     F_m = new double[par.nx + 1];
     F_imp = new double[par.nx + 1];
     F_e = new double[par.nx + 1];
-    
     // Начальные условия
     set_initial_conditions();
     t = 0.0;
@@ -38,7 +36,6 @@ Solver_Godunov1D::~Solver_Godunov1D()
     delete[] F_m;
     delete[] F_e;
     delete[] F_imp;
-    //omega;
 }
 
 // TODO переписать под выбор типа граничного условия
@@ -68,8 +65,6 @@ void Solver_Godunov1D::apply_boundary_conditions()
     F_e[0] = (rho_e[0] + p[0]) * rho_u[0] / rho[0];
     F_e[par.nx] = (rho_e[par.nx_all - 1] + p[par.nx_all - 1]) * rho_u[par.nx_all - 1] / rho[par.nx_all - 1];
 }
-
-
 
 void Solver_Godunov1D::solve_step()
 {
@@ -298,57 +293,42 @@ void Solver_Godunov1D::set_initial_conditions()
             {
                 rho[i] = 0.125;
                 p[i] = 0.1;
-            };
-            
+            }
             rho_e[i] = rho[i] * ((pow(0.0, 2)) / 2.0  + p[i] / (par.gamma - 1.0) / rho[i]);
             rho_u[i] = rho[i] * 0.0;
             x[i] = (i + 0.5 - par.nx_fict) * par.dx;
-        };
+        }
     }
-
 
     else if (par.ic_preset == IC_TEST2)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
         {
             rho[i] = 1.0;
-
-
-            if (i * par.dx <= 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx) rho_u[i] = rho[i] * (-2.0);
-
-            else rho_u[i] = rho[i] * 2.0;
-            
-
+            rho_u[i] = i * par.dx <= 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx ? rho[i] * (-2.0) : rho[i] * 2.0;
             p[i] = 0.4;
             rho_e[i] = rho[i] * pow(2.0, 2) / 2.0 + p[i] / (par.gamma - 1.0);
             x[i] = (i + 0.5 - par.nx_fict) * par.dx;
-        };
+        }
     }
-    
 
     else if (par.ic_preset == IC_TEST3)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
         {
-            if (i * par.dx <= 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx) p[i] = 1000.0;
-
-            else p[i] = 0.01;
-            
-
+            p[i] = i * par.dx <= 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx ? 1000.0 : 0.01;
             rho[i] = 1.0;
             rho_e[i] = rho[i] * ((pow(0.0, 2)) / 2.0  + p[i] / (par.gamma - 1.0) / rho[i]);
             rho_u[i] = rho[i] * 0.0;
             x[i] = (i + 0.5 - par.nx_fict) * par.dx;
-        };
+        }
     }
     else
     {
         std::cerr << "Initial condition is not set: " << par.ic_preset << std::endl;
         exit(1);
-    };
+    }
 }
-
-
 
 void Solver_Godunov1D::get_time_step()
 {
@@ -363,8 +343,6 @@ void Solver_Godunov1D::get_time_step()
     dt = min_dt;
 }
 
-
-
 void Solver_Godunov1D::write_data()
 {
     std::string file_name = "data/" + std::to_string(step) + ".csv";
@@ -374,15 +352,14 @@ void Solver_Godunov1D::write_data()
     double int_e_out[par.nx];
     double p_out[par.nx];
     double x_out[par.nx];
-    
-
+    	
     for(unsigned int i = 0; i < par.nx; i++)
     {
         rho_out[i] = rho[par.nx_fict + i];
         u_out[i] = rho_u[par.nx_fict + i] / rho_out[i];
         p_out[i] = p[par.nx_fict + i];
         int_e_out[i] = rho_e[par.nx_fict + i] / rho_out[i] - pow(u_out[i], 2) / 2.0;
-        x_out[i] = x[par.nx_fict + i];
+        x_out[i] = 0.5 * (x[par.nx_fict + i] + x[par.nx_fict + i + 1]);
 
         file << x_out[i] << " " << rho_out[i]  << " " << u_out[i] << " " << p_out[i] << "\n";
 

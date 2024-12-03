@@ -45,6 +45,12 @@ Parameters::Parameters(std::string file_name) {
 		{"VISC_LINEAR", VISC_LINEAR},
 		{"VISC_SUM", VISC_SUM}
 	};
+	std::map<std::string, Reconstruction> Reconstruction_map = {
+		{"Godunov", Godunov},
+		{"Kolgan_1972", Kolgan_1972},
+		{"Kolgan_1975", Kolgan_1975},
+		{"Osher_1984", Osher_1984}
+	};
 
 	test = TEST_CUSTOM;
 	ic_preset = IC_CUSTOM;
@@ -85,6 +91,9 @@ Parameters::Parameters(std::string file_name) {
 
             	else if (strcmp(var_type.c_str(), "VISC_types") == 0) { // specific viscosity case
 					viscosity = VISC_type_map[var_value];
+				}
+            	else if (strcmp(var_type.c_str(), "Reconstruction") == 0) { // specific viscosity case
+					reconstruction = Reconstruction_map[var_value];
 				}
 
             	else if (strcmp(var_type.c_str(), "test") == 0) { // specific test_preset case
@@ -156,6 +165,7 @@ Parameters::Parameters(const Parameters& rhs):
 	test(rhs.test),
 	ic_preset(rhs.ic_preset),
 	viscosity(rhs.viscosity),
+	reconstruction(rhs.reconstruction),
 	mu0(rhs.mu0),	
 	is_conservative(rhs.is_conservative),
 	gamma(rhs.gamma),
