@@ -4,6 +4,10 @@
 
 *.exe
 
+*.png
+
+main
+
 data/*.csv
 
 object_files/*

@@ -1,12 +1,12 @@
 double	x_start	0.0
 double	x_end	1.0
-unsignedint	nx	51
+unsignedint	nx	50
 unsignedint	nx_fict	1
 double	CFL	0.5
 unsignedint	nt	100
 bool	is_conservative	1
 VISC_types	banana	VISC_NEUMAN
-Initial	banana	IC_TEST2
+Initial	banana	IC_TEST1
 Reconstruction	banana	Godunov
 wall	banana	0	{
 	type	FLUX
