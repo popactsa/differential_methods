@@ -8,43 +8,45 @@
 #include <map>
 #include <vector>
 #include "auxiliary_functions.h"
-#include "Wall.h"
+#include "Boundary.h"
 
 const double R = 8.31;
 
-enum test_preset {
-	TEST_CUSTOM,
-	TEST1,
-	TEST2,
-	TEST3,
-	TEST4
-};
-
-enum IC_preset {
+enum InitialPreset {
 	IC_CUSTOM,
 	IC_TEST1,
 	IC_TEST2,
 	IC_TEST3,
-	IC_TEST4
+	IC_TEST4,
 };
 
-enum VISC_types {
-	VISC_NONE,
-	VISC_NEUMAN,
-	VISC_LATTER,
-	VISC_LINEAR,
-	VISC_SUM
+enum ArtificialViscosity {
+	V_NONE,
+	V_NEUMAN,
+	V_LATTER,
+	V_LINEAR,
+	V_SUM,
 };
 
 enum Reconstruction {
-	GODUNOV,
-	KOLGAN72,
-	KOLGAN75,
-	OSHER84
+	R_GODUNOV,
+	R_KOLGAN72,
+	R_KOLGAN75,
+	R_OSHER84,
 };
 
+enum TimeAlgo {
+	T_EULER,
+	T_RUNGEKUTTA,
+};
+
+enum FluxScheme {
+	F_GODUNOV,
+	F_RLF,
+};
+
+
 struct Parameters {
-	double g_x;
 	double x_start, x_end;
 	unsigned int nx; // amount of x ceils
 	double dx;
@@ -52,11 +54,12 @@ struct Parameters {
 	unsigned int nx_all;
 	double CFL;
 	unsigned int nt;
-	test_preset test;
-	Wall walls[2]; // only 2 walls for 1D situation
-	IC_preset ic_preset;
-	VISC_types viscosity;
+	Boundary boundaries[2]; // only 2 walls for 1D situation
+	InitialPreset ic_preset;
+	ArtificialViscosity viscosity_type;
 	Reconstruction reconstruction_type;
+	TimeAlgo time_algo;
+	FluxScheme flux_scheme;
 	bool is_conservative;
 	double mu0;
 

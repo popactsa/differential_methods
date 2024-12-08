@@ -5,14 +5,16 @@ unsignedint	nx_fict	1
 double	CFL	0.5
 unsignedint	nt	100
 bool	is_conservative	1
-VISC_types	banana	VISC_NEUMAN
+ArtificialViscosity	banana	NEUMAN
 double	mu0	1.0
-initial	banana	IC_TEST3
-reconstruction	banana	GODUNOV
-wall	banana	0	{
+InitialPreset	banana	TEST1
+Reconstruction	banana	OSHER84
+TimeAlgo	banana	EULER
+FluxScheme	banana	GODUNOV
+Boundary	banana	0	{
 	type	FLUX
 }
-wall	banana	1	{
+Boundary	banana	1	{
 	type	FLUX
 }
 double	gamma	1.4

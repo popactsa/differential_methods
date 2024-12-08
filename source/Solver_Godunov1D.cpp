@@ -55,37 +55,37 @@ void Solver_Godunov1D::apply_boundary_conditions()
     }
     for (unsigned int i = 0; i < 2; ++i)   // Одномерное уравнение -> 2 граничных условия
     {
-        if (par.walls[i].type == WALL)
+        if (par.boundaries[i].b_type == B_WALL)
         {
             double v_b = 0.0;
 			if(par.ic_preset == IC_TEST2) v_b = -2.0 ? (i == 0) : 2.0;
-            
+
 			int i_temp = 0;
 			if(i) i_temp = par.nx_all-1;
-            
+
 			int sign = 1-2*(i%2);
 			for (unsigned int k = 0; k < par.nx_fict; ++k)
                 rho_u[i_temp+sign*k] = -rho_u[i_temp+sign*par.nx_fict];
-            
+
 			int f_i_temp = 0;
 			if(i%2) f_i_temp = par.nx;
-            
+
 			F_m[f_i_temp] = v_b*rho[i_temp];
             F_imp[f_i_temp] = pow(v_b, 2)*rho[i_temp] + p[i_temp];
             F_e[f_i_temp] = (rho_e[i_temp] + p[i_temp]) * v_b * rho[i_temp];
         }
-        else if (par.walls[i].type == FLUX)
+        else if (par.boundaries[i].b_type == B_FLUX)
         {
             int i_temp = 0;
 			if(i%2) i_temp = par.nx_all-1;
-            
+
 			int sign = 1-2*(i%2);
 			for (unsigned int k = 0; k < par.nx_fict; ++k)
                 rho_u[i_temp+sign*k] = rho_u[i_temp+sign*par.nx_fict];
-            
+
 			int f_i_temp = 0;
 			if(i%2) f_i_temp = par.nx;
-            
+
 			F_m[f_i_temp] = rho_u[i_temp];
             F_imp[f_i_temp] = pow(rho_u[i_temp], 2) / rho[i_temp] + p[i_temp];
             F_e[f_i_temp] = (rho_e[i_temp] + p[i_temp]) * rho_u[i_temp] / rho[i_temp];
@@ -110,39 +110,50 @@ void Solver_Godunov1D::solve_step()
     apply_godunov_method(par, \
                   F_m, F_imp, F_e, \
                   rho, rho_u, rho_e, p);
-    /*// Рунге-Кутта
-    double rho_pred[par.nx_all];
-    double rho_u_pred[par.nx_all];
-    double rho_e_pred[par.nx_all];
-    double p_pred[par.nx_all];
-    // Пересчет значений предиктор
-    for (int i = par.nx_fict; i < par.nx + par.nx_fict; ++i)
-    {
-        rho_pred[i] = rho[i] - (F_m[i] - F_m[i - 1]) * dt / par.dx;
-        rho_u_pred[i] = rho_u[i] - (F_imp[i] - F_imp[i - 1]) * dt / par.dx;
-        rho_e_pred[i] = rho_e[i] - (F_e[i] - F_e[i - 1]) * dt / par.dx;
-        p_pred[i] = (par.gamma - 1) * (rho_e_pred[i] - pow(rho_u_pred[i], 2) / rho_pred[i] / 2.0);
-    }
-    calc_all_flux(par, \
-                  F_m, F_imp, F_e, \
-                  rho_pred, rho_u_pred, rho_e_pred, p_pred);
-    // Пересчет значений корректор
-    for (int i = par.nx_fict; i < par.nx + par.nx_fict; ++i)
-    {
-        rho[i] = 0.5*(rho[i] + rho_pred[i]) - 0.5*(F_m[i] - F_m[i - 1]) * dt / par.dx;
-        rho_u[i] = 0.5*(rho_u[i] + rho_u_pred[i]) - 0.5*(F_imp[i] - F_imp[i - 1]) * dt / par.dx;
-        rho_e[i] = 0.5*(rho_e[i] + rho_e_pred[i]) - 0.5*(F_e[i] - F_e[i - 1]) * dt / par.dx;
-        p[i] = (par.gamma - 1) * (rho_e[i] - pow(rho_u[i], 2) / rho[i] / 2.0);
-    }*/
-    // формула Эйлера
-    // Пересчет значений
-    for (int i = par.nx_fict; i < par.nx + par.nx_fict; ++i)
-    {
-        rho[i] = rho[i] - (F_m[i] - F_m[i - 1]) * dt / par.dx;
-        rho_u[i] = rho_u[i] - (F_imp[i] - F_imp[i - 1]) * dt / par.dx;
-        rho_e[i] = rho_e[i] - (F_e[i] - F_e[i - 1]) * dt / par.dx;
-        p[i] = (par.gamma - 1) * (rho_e[i] - pow(rho_u[i], 2) / rho[i] / 2.0);
-    }
+
+	//Пересчет значений
+	if (par.time_algo == T_EULER) {
+	// формула Эйлера
+		for (int i = par.nx_fict; i < par.nx + par.nx_fict; ++i)
+		{
+			rho[i] = rho[i] - (F_m[i] - F_m[i - 1]) * dt / par.dx;
+			rho_u[i] = rho_u[i] - (F_imp[i] - F_imp[i - 1]) * dt / par.dx;
+			rho_e[i] = rho_e[i] - (F_e[i] - F_e[i - 1]) * dt / par.dx;
+			p[i] = (par.gamma - 1) * (rho_e[i] - pow(rho_u[i], 2) / rho[i] / 2.0);
+		}
+	}
+
+	else if (par.time_algo == T_RUNGEKUTTA) {
+	// Рунге-Кутта
+	   double rho_pred[par.nx_all];
+	   double rho_u_pred[par.nx_all];
+	   double rho_e_pred[par.nx_all];
+	   double p_pred[par.nx_all];
+	   // Пересчет значений предиктор
+	   for (int i = par.nx_fict; i < par.nx + par.nx_fict; ++i)
+	   {
+	       rho_pred[i] = rho[i] - (F_m[i] - F_m[i - 1]) * dt / par.dx;
+	       rho_u_pred[i] = rho_u[i] - (F_imp[i] - F_imp[i - 1]) * dt / par.dx;
+	       rho_e_pred[i] = rho_e[i] - (F_e[i] - F_e[i - 1]) * dt / par.dx;
+	       p_pred[i] = (par.gamma - 1) * (rho_e_pred[i] - pow(rho_u_pred[i], 2) / rho_pred[i] / 2.0);
+	   }
+	   apply_godunov_method(par, \
+	                 F_m, F_imp, F_e, \
+	                 rho_pred, rho_u_pred, rho_e_pred, p_pred);
+	   // Пересчет значений корректор
+	   for (int i = par.nx_fict; i < par.nx + par.nx_fict; ++i)
+	   {
+	       rho[i] = 0.5*(rho[i] + rho_pred[i]) - 0.5*(F_m[i] - F_m[i - 1]) * dt / par.dx;
+	       rho_u[i] = 0.5*(rho_u[i] + rho_u_pred[i]) - 0.5*(F_imp[i] - F_imp[i - 1]) * dt / par.dx;
+	       rho_e[i] = 0.5*(rho_e[i] + rho_e_pred[i]) - 0.5*(F_e[i] - F_e[i - 1]) * dt / par.dx;
+	       p[i] = (par.gamma - 1) * (rho_e[i] - pow(rho_u[i], 2) / rho[i] / 2.0);
+	   }
+	}
+
+	else {
+		std::cerr << "\nERROR: time integration algorithm is not set" << std::endl;
+        exit(1);
+	}
 };
 
 // TODO переписать под передачу массивов в качестве аргументов
@@ -193,7 +204,7 @@ void Solver_Godunov1D::set_initial_conditions()
     }
     else
     {
-        std::cerr << "Initial condition is not set: " << par.ic_preset << std::endl;
+        std::cerr << "\nERROR: Initial condition is not set: " << par.ic_preset << std::endl;
         exit(1);
     }
 }
@@ -428,7 +439,7 @@ void write_exact_solution(Solver_Godunov1D solver)
 	}
 	else
     {
-        std::cerr << "Initial condition is not set: " << par.ic_preset << std::endl;
+        std::cerr << "\nERROR: Initial condition is not set: " << par.ic_preset << std::endl;
         exit(1);
     }
     double c_l = (rho_l != 0.0) ? sqrt(par.gamma * p_l / rho_l) : 0.0;
@@ -436,7 +447,7 @@ void write_exact_solution(Solver_Godunov1D solver)
     // Условие из Toro, 175 (153). Вывод, 165 (143)
     if (2.0 / (par.gamma - 1) * (c_l + c_r) <= (u_r - u_l))
     {
-        std::cerr << "Vaccum!" << std::endl;
+        std::cerr << "\nERROR: Vaccum" << std::endl;
         exit(1);
     }
     double p_s = 0.5 * (p_l + p_r);
@@ -487,14 +498,14 @@ double minmod(Reconstruction reconstruction_type, double a, double b)
 	double grad;
 	double c;
 	switch (reconstruction_type) {
-		case KOLGAN72:
+		case R_KOLGAN72:
 			if (fabs(a) < fabs(b))
 				grad = a;
 			else
 				grad = b;
 			break;
 		
-		case KOLGAN75:
+		case R_KOLGAN75:
 			c = 0.5 * (a + b);
 			if ( (fabs(a) < fabs(b)) && (fabs(a) < fabs(c)) )
 				grad = a;
@@ -504,7 +515,7 @@ double minmod(Reconstruction reconstruction_type, double a, double b)
 				grad = c;
 			break;
 		
-		case OSHER84:
+		case R_OSHER84:
 			if (pow(a, 2) < a*b)
 				grad = a;
 			else if (pow(b, 2) < a*b)
@@ -524,7 +535,7 @@ void apply_reconstruction(Parameters par, \
                             double* p_left, double* p_right, \
                             double* rho, double* rho_u, double* rho_e, double* p)
 {
-    if (par.reconstruction_type == GODUNOV)
+    if (par.reconstruction_type == R_GODUNOV)
 	{
 		for (int i = 0; i < par.nx; ++i)
     	{
@@ -540,9 +551,9 @@ void apply_reconstruction(Parameters par, \
     	}
 	}
 
-	else if ((par.reconstruction_type == KOLGAN72) || \
-			(par.reconstruction_type == KOLGAN75) || \
-			(par.reconstruction_type == OSHER84))
+	else if ((par.reconstruction_type == R_KOLGAN72) || \
+			(par.reconstruction_type == R_KOLGAN75) || \
+			(par.reconstruction_type == R_OSHER84))
 	{
 		double a_rho, b_rho;
 		double a_rho_u, b_rho_u;
@@ -582,7 +593,7 @@ void apply_reconstruction(Parameters par, \
 	
 	else
     {
-        std::cerr << "Reconstruction type is not set!" << std::endl;
+        std::cerr << "\nERROR: Reconstruction type is not set" << std::endl;
         exit(1);
     }
 }
@@ -619,7 +630,7 @@ void apply_godunov_method(Parameters par, \
         // Условие из Toro, 175 (153). Вывод, 165 (143)
         if (2.0 / (par.gamma - 1) * (c_l + c_r) <= (u_r - u_l))
         {
-            std::cerr << "Vaccum!" << std::endl;
+            std::cerr << "\nERROR: Vaccum" << std::endl;
             exit(1);
         }
         double p_s = 0.5 * (p_l + p_r);
@@ -657,9 +668,21 @@ void apply_godunov_method(Parameters par, \
                         rho_l, rho_r, \
                         S, u_s, p_s, \
                         p_temp, rho_temp, u_temp);
-        // Поток Годунова
-        get_godunov_flux(par, \
-                     p_temp, rho_temp, u_temp, \
-                     F_m[i], F_imp[i], F_e[i]);
-    }
+
+		if (par.flux_scheme == F_GODUNOV) {
+			// Поток Годунова
+        	get_godunov_flux(par, \
+					p_temp, rho_temp, u_temp, \
+					F_m[i], F_imp[i], F_e[i]);
+		}
+		else if (par.flux_scheme == F_RLF) {
+			std::cerr << "\nERROR: Flux calculation scheme is not set yet" << std::endl;
+            exit(1);
+		}
+		// TODO не вызывается если в фалйе прописана любая ерунда
+		else {
+			std::cerr << "\nERROR: Flux calculation scheme is not set" << std::endl;
+            exit(1);
+		}
+	}
 }

@@ -16,40 +16,47 @@ Parameters::Parameters(std::string file_name) {
 		{"is_conservative", &is_conservative},
 		{"mu0", &mu0},
 	};
-	std::map<std::string, E_BOUNDARY_TYPE> wall_type_map = {
-		{"WALL", WALL},
-		{"FLUX", FLUX}
+	std::map<std::string, BoundaryType> boundary_type_map = {
+		{"WALL", B_WALL},
+		{"FLUX", B_FLUX},
 	};
-	std::map<std::string, unsigned short int> wall_args = {
-		{"E_BOUNDARY_TYPE", 0},
+	std::map<std::string, unsigned short int> boundary_args = {
+		{"BoundaryType", 0},
 		{"T", 1},
-		{"v_x", 2}
+		{"v_x", 2},
 	};
-	std::map<std::string, IC_preset> IC_type_map = {
-		{"IC_TEST1", IC_TEST1},
-		{"IC_TEST2", IC_TEST2},
-		{"IC_TEST3", IC_TEST3},
-		{"IC_TEST4", IC_TEST4}
+	std::map<std::string, InitialPreset> ic_type_map = {
+		{"TEST1", IC_TEST1},
+		{"TEST2", IC_TEST2},
+		{"TEST3", IC_TEST3},
+		{"TEST4", IC_TEST4},
 	};
-	std::map<std::string, VISC_types> VISC_type_map = {
-		{"VISC_NONE", VISC_NONE},
-		{"VISC_NEUMAN", VISC_NEUMAN},
-		{"VISC_LATTER", VISC_LATTER},
-		{"VISC_LINEAR", VISC_LINEAR},
-		{"VISC_SUM", VISC_SUM}
+	std::map<std::string, ArtificialViscosity> visc_type_map = {
+		{"NONE", V_NONE},
+		{"NEUMAN", V_NEUMAN},
+		{"LATTER", V_LATTER},
+		{"LINEAR", V_LINEAR},
+		{"SUM", V_SUM},
 	};
 	std::map<std::string, Reconstruction> reconstruction_map = {
-		{"GODUNOV", GODUNOV},
-		{"KOLGAN72", KOLGAN72},
-		{"KOLGAN75", KOLGAN75},
-		{"OSHER84", OSHER84}
+		{"GODUNOV", R_GODUNOV},
+		{"KOLGAN72", R_KOLGAN72},
+		{"KOLGAN75", R_KOLGAN75},
+		{"OSHER84", R_OSHER84},
 	};
-
-	test = TEST_CUSTOM;
-	ic_preset = IC_CUSTOM;
-	viscosity = VISC_NONE;
+	std::map<std::string, TimeAlgo> time_algo_map = {
+		{"EULER", T_EULER},
+		{"RUNGEKUTTA", T_RUNGEKUTTA},
+	};
+	std::map<std::string, FluxScheme> flux_scheme_map = {
+		{"GODUNOV", F_GODUNOV},
+		{"RLF", F_RLF},
+	};
 	
-	for (unsigned int i = 0; i < 2; ++i) walls[i].bc_preset = BC_CUSTOM;
+	InitialPreset ic_test = IC_CUSTOM;
+	ArtificialViscosity viscosity_type = V_NONE;
+	
+	for (unsigned int i = 0; i < 2; ++i) boundaries[i].b_preset = B_CUSTOM;
 	
 	if (fin.is_open()) {
 		std::string line;
@@ -68,23 +75,29 @@ Parameters::Parameters(std::string file_name) {
 			
 			else if (strcmp(var_type.c_str(), "bool") == 0)
 				*(bool*)vars[var_name] = std::stoi(var_value);
-            
+
 			else if (strcmp(var_type.c_str(), "unsignedint") == 0)
 			    *(unsigned int*)vars[var_name] = std::stoi(var_value);
 
-        	else if (strcmp(var_type.c_str(), "wall") == 0) // specific wall_type case
+        	else if (strcmp(var_type.c_str(), "Boundary") == 0) // specific wall_type case
 				get_next_substr_between_sep(args_control, line, sep, curr_sep_pos);
 
-			else if (strcmp(var_type.c_str(), "initial") == 0) // specific initial_condition case
-				ic_preset = IC_type_map[var_value];
+			else if (strcmp(var_type.c_str(), "InitialPreset") == 0) // specific initial_condition case
+				ic_preset = ic_type_map[var_value];
 
-			else if (strcmp(var_type.c_str(), "VISC_types") == 0) // specific viscosity case
-				viscosity = VISC_type_map[var_value];
-            	
-			else if (strcmp(var_type.c_str(), "reconstruction") == 0) // specific viscosity case
+			else if (strcmp(var_type.c_str(), "ArtificialViscosity") == 0) // specific viscosity case
+				viscosity_type = visc_type_map[var_value];
+
+			else if (strcmp(var_type.c_str(), "Reconstruction") == 0) // specific reconstruction case
 				reconstruction_type = reconstruction_map[var_value];
 
-            else if (strcmp(var_type.c_str(), "string") == 0)
+			else if (strcmp(var_type.c_str(), "TimeAlgo") == 0) // specific time algorithm case
+				time_algo = time_algo_map[var_value];
+
+			else if (strcmp(var_type.c_str(), "FluxScheme") == 0) // specific flux calculation case
+				flux_scheme = flux_scheme_map[var_value];
+
+			else if (strcmp(var_type.c_str(), "string") == 0)
 				*(std::string*)vars[var_name] = var_value;
 
             else {
@@ -100,21 +113,21 @@ Parameters::Parameters(std::string file_name) {
 					if (strcmp(opening.c_str(), "}") == 0) break;
 					get_next_substr_between_sep(arg_name, line, sep, curr_sep_pos);
 					get_next_substr_between_sep(arg_value, line, sep, curr_sep_pos);
-					if (strcmp(var_type.c_str(), "wall") == 0) {
+					if (strcmp(var_type.c_str(), "Boundary") == 0) {
 						if (arg_name == "type")
-							walls[std::stoul(var_value)].type = wall_type_map[arg_value];
+							boundaries[std::stoul(var_value)].b_type = boundary_type_map[arg_value];
 						
 						else if (arg_name == "T")
-							walls[std::stoul(var_value)].T = std::stod(arg_value);
+							boundaries[std::stoul(var_value)].T = std::stod(arg_value);
 						
 						else if (arg_name == "v_x")
-							walls[std::stoul(var_value)].v_x = std::stod(arg_value);
+							boundaries[std::stoul(var_value)].v_x = std::stod(arg_value);
 						
 						else {
-							std::cerr << "Wall " << var_value << " arg type not found (" << arg_name << ")" << std::endl;
+							std::cerr << "Boundary " << var_value << " arg type not found (" << arg_name << ")" << std::endl;
 							exit(1);
 						}
-						std::cout << "Wall " << var_value << " : " << arg_name << "," << arg_value << std::endl;
+						std::cout << "Boundary " << var_value << " : " << arg_name << "," << arg_value << std::endl;
 					}
 				}
 			}
@@ -125,10 +138,10 @@ Parameters::Parameters(std::string file_name) {
 		Cv = R / (gamma - 1.0);
 		Cp = Cv + R;
 		
-		if (test != TEST_CUSTOM) {
-			ic_preset = IC_preset(test);
+		if (ic_test != IC_CUSTOM) {
+			ic_preset = InitialPreset(ic_test);
 			for (unsigned int i = 0; i < 2; ++i) {
-				walls[i].bc_preset = BC_preset(test); // it's easier to specify further boundary values in solver,
+				boundaries[i].b_preset = BoundaryPreset(ic_test); // it's easier to specify further boundary values in solver,
 										  // than to add many elif cases here //
 										  // assigned boundary values don't matter
 										  // i'm sorry
@@ -151,11 +164,12 @@ Parameters::Parameters(const Parameters& rhs):
 	nx_all(rhs.nx_all),
 	CFL(rhs.CFL),
 	nt(rhs.nt),
-	test(rhs.test),
 	ic_preset(rhs.ic_preset),
-	viscosity(rhs.viscosity),
+	viscosity_type(rhs.viscosity_type),
 	mu0(rhs.mu0),
 	reconstruction_type(rhs.reconstruction_type),
+	time_algo(rhs.time_algo),
+	flux_scheme(rhs.flux_scheme),
 	is_conservative(rhs.is_conservative),
 	gamma(rhs.gamma),
 	Cv(rhs.Cv),
@@ -163,5 +177,5 @@ Parameters::Parameters(const Parameters& rhs):
 	nt_write(rhs.nt_write),
 	write_file(rhs.write_file)
 {
-	std::copy(std::begin(rhs.walls), std::end(rhs.walls), std::begin(walls));
+	std::copy(std::begin(rhs.boundaries), std::end(rhs.boundaries), std::begin(boundaries));
 };
