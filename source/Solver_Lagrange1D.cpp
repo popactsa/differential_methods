@@ -39,7 +39,7 @@ void Solver_Lagrange1D::apply_boundary_conditions()
     // velocity
     for (unsigned int i = 0; i < 2; ++i)   // 1D -> 2 walls
     {
-        if (par.walls[i].type == WALL)
+        if (par.boundaries[i].b_type == B_WALL)
         {
             if(par.ic_preset == IC_TEST1 || par.ic_preset == IC_TEST3  || par.ic_preset == IC_TEST4)
             {
@@ -62,7 +62,7 @@ void Solver_Lagrange1D::apply_boundary_conditions()
             // v[0] = -v[2] + 2.0 * v[1];
             // v[par.nx_all] = -v[par.nx_all - 2] + 2.0 * v[par.nx_all - 1];
         }
-        else if (par.walls[i].type == FLUX)
+        else if (par.boundaries[i].b_type == B_FLUX)
         {
             int i_temp = 0;
             if(i == 1) i_temp = par.nx_all; // right wall case
@@ -88,29 +88,29 @@ void Solver_Lagrange1D::solve_step()
     {
         v_last[i] = v[i];
     }
-    if (par.viscosity == VISC_NONE)
+    if (par.viscosity_type == V_NONE)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
             omega[i] = 0.0;
     }
-    else if (par.viscosity == VISC_NEUMAN)
+    else if (par.viscosity_type == V_NEUMAN)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
             omega[i] = -par.mu0*rho[i]*fabs(v[i+1] - v[i])*(v[i+1] - v[i]);
     }
-    else if (par.viscosity == VISC_LATTER)
+    else if (par.viscosity_type == V_LATTER)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
             omega[i] = ((v[i+1] - v[i]) < 0.0) ? par.mu0*rho[i]*(v[i+1] - v[i])*(v[i+1] - v[i]) : 0.0;
     }
-    else if (par.viscosity == VISC_LINEAR)
+    else if (par.viscosity_type == V_LINEAR)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
 	  {
             omega[i] = par.mu0 * rho[i] * (v[i + 1] - v[i]) * m[i];
 	  }
     }
-    else if (par.viscosity == VISC_SUM)
+    else if (par.viscosity_type == V_SUM)
     {
         for (unsigned int i = 0; i < par.nx_all; ++i)
 	  {
@@ -119,7 +119,7 @@ void Solver_Lagrange1D::solve_step()
     }
     else
     {
-        std::cerr << "Viscosity is not set: " << par.viscosity << std::endl;
+        std::cerr << "Viscosity is not set: " << par.viscosity_type << std::endl;
         exit(1);
     }
 
