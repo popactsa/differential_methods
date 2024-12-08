@@ -22,7 +22,7 @@ Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
         if (step % par.nt_write == 0)
             write_data();
         if(step == 49)
-            exact_solution(*this);
+            write_exact_solution(*this);
     }
     // Конец расчета
     std::cout << "Done" << std::endl;
@@ -107,7 +107,7 @@ void Solver_Godunov1D::solve_step()
     get_time_step();
     t += dt;
     apply_boundary_conditions();
-    calc_all_flux(par, \
+    apply_godunov_method(par, \
                   F_m, F_imp, F_e, \
                   rho, rho_u, rho_e, p);
     /*// Рунге-Кутта

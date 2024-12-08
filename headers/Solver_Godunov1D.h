@@ -30,26 +30,25 @@ void choose_solution(Parameters par, \
                      double S, double u_s, double p_s, \
                      double& p_temp, double& rho_temp, double& u_temp);
 
-void godunov_flux(Parameters par, \
+void get_godunov_flux(Parameters par, \
                   double p_temp, double rho_temp, double u_temp, \
                   double& F_m, double& F_imp, double& F_e);
 
-void newton_iteration(Parameters par, \
+void make_newton_iteration(Parameters par, \
                       double p_l, double p_r, \
                       double u_l, double u_r, \
                       double rho_l, double rho_r, \
                       double& p_s);
 
-void exact_solution(Solver_Godunov1D solver);
+void write_exact_solution(Solver_Godunov1D solver);
 
-void godunov_reconstruction(Parameters par, \
+void apply_godunov_reconstruction(Parameters par, \
                             double* rho_left, double* rho_right, \
                             double* rho_u_left, double* rho_u_right, \
                             double* rho_e_left, double* rho_e_right, \
                             double* p_left, double* p_right, \
                             double* rho, double* rho_u, double* rho_e, double* p);
-//TODO как нормально назвать функцию
-void calc_all_flux(Parameters par, \
+void apply_godunov_method(Parameters par, \
                    double* F_m, double* F_imp, double* F_e, \
                    double* rho, double* rho_u, double* rho_e, double* p);
 #endif
