@@ -5,26 +5,24 @@ Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
 {
     p = new double[par.nx_all];
     rho = new double[par.nx_all];
-    rho_u = new double[par.nx_all];
-    rho_e = new double[par.nx_all];
+    rho_u = new double[par.nx_all]; //rho * v(voprosi?)
+    rho_e = new double[par.nx_all]; //rho * e
 
     x = new double[par.nx_all + 1];
     F_m = new double[par.nx + 1];
     F_imp = new double[par.nx + 1];
     F_e = new double[par.nx + 1];
-    // Начальные условия
+
     set_initial_conditions();
     t = 0.0;
     for (step = 1; step <= par.nt; step++)
     {
-        // Решение на текущем шаге
         solve_step();
         if (step % par.nt_write == 0)
             write_data();
         if(step == 49)
             write_exact_solution(*this);
     }
-    // Конец расчета
     std::cout << "Done" << std::endl;
 }
 
@@ -58,35 +56,33 @@ void Solver_Godunov1D::apply_boundary_conditions()
         if (par.boundaries[i].b_type == B_WALL)
         {
             double v_b = 0.0;
-			if(par.ic_preset == IC_TEST2) v_b = -2.0 ? (i == 0) : 2.0;
+		if(par.ic_preset == IC_TEST2) v_b = -2.0 ? (i == 0) : 2.0;
 
-			int i_temp = 0;
-			if(i) i_temp = par.nx_all-1;
+		int i_temp = i ? par.nx_all-1 : 0;
 
-			int sign = 1-2*(i%2);
-			for (unsigned int k = 0; k < par.nx_fict; ++k)
-                rho_u[i_temp+sign*k] = -rho_u[i_temp+sign*par.nx_fict];
+		int sign = i%2 ? 1 : -1;
+		for (unsigned int k = 0; k < par.nx_fict; ++k)
+          rho_u[i_temp+sign*k] = -rho_u[i_temp+sign*par.nx_fict];
 
-			int f_i_temp = 0;
-			if(i%2) f_i_temp = par.nx;
+		int f_i_temp = 0;
+		if(i%2) f_i_temp = par.nx;
 
-			F_m[f_i_temp] = v_b*rho[i_temp];
+		F_m[f_i_temp] = v_b*rho[i_temp];
             F_imp[f_i_temp] = pow(v_b, 2)*rho[i_temp] + p[i_temp];
             F_e[f_i_temp] = (rho_e[i_temp] + p[i_temp]) * v_b * rho[i_temp];
         }
         else if (par.boundaries[i].b_type == B_FLUX)
         {
-            int i_temp = 0;
-			if(i%2) i_temp = par.nx_all-1;
+		int i_temp = i ? par.nx_all-1 : 0;
 
-			int sign = 1-2*(i%2);
-			for (unsigned int k = 0; k < par.nx_fict; ++k)
-                rho_u[i_temp+sign*k] = rho_u[i_temp+sign*par.nx_fict];
+		int sign = i%2 ? 1 : -1;
+		for (unsigned int k = 0; k < par.nx_fict; ++k)
+          rho_u[i_temp+sign*k] = rho_u[i_temp+sign*par.nx_fict];
 
-			int f_i_temp = 0;
-			if(i%2) f_i_temp = par.nx;
+		int f_i_temp = 0;
+		if(i%2) f_i_temp = par.nx;
 
-			F_m[f_i_temp] = rho_u[i_temp];
+		F_m[f_i_temp] = rho_u[i_temp];
             F_imp[f_i_temp] = pow(rho_u[i_temp], 2) / rho[i_temp] + p[i_temp];
             F_e[f_i_temp] = (rho_e[i_temp] + p[i_temp]) * rho_u[i_temp] / rho[i_temp];
         }
@@ -138,8 +134,8 @@ void Solver_Godunov1D::solve_step()
 	       p_pred[i] = (par.gamma - 1) * (rho_e_pred[i] - pow(rho_u_pred[i], 2) / rho_pred[i] / 2.0);
 	   }
 	   apply_godunov_method(par, \
-	                 F_m, F_imp, F_e, \
-	                 rho_pred, rho_u_pred, rho_e_pred, p_pred);
+	   	F_m, F_imp, F_e, \
+	   	rho_pred, rho_u_pred, rho_e_pred, p_pred);
 	   // Пересчет значений корректор
 	   for (int i = par.nx_fict; i < par.nx + par.nx_fict; ++i)
 	   {
