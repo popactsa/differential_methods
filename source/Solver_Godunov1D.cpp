@@ -40,7 +40,6 @@ Solver_Godunov1D::~Solver_Godunov1D()
     delete[] F_imp;
 }
 
-// TODO переписать под выбор типа граничного условия
 void Solver_Godunov1D::apply_boundary_conditions()
 {
     for (unsigned int i = 0; i < par.nx_fict; ++i)
@@ -54,40 +53,40 @@ void Solver_Godunov1D::apply_boundary_conditions()
         p[i] = p[par.nx_fict];
         p[par.nx_all - i - 1] = p[par.nx_all - par.nx_fict - 1];
     }
-    for (unsigned int i = 0; i < 2; ++i)   // 1D -> 2 walls
+    for (unsigned int i = 0; i < 2; ++i)   // Одномерное уравнение -> 2 граничных условия
     {
         if (par.walls[i].type == WALL)
         {
             double v_b = 0.0;
-            if(par.ic_preset == IC_TEST2)
-            {
-                v_b = -2.0 ? (i == 0) : 2.0;
-            }
-            int i_temp = 0;
-            if(i)
-                i_temp = par.nx_all-1;
-            int sign = 1-2*(i%2);
-            for (unsigned int k = 0; k < par.nx_fict; ++k)
+			if(par.ic_preset == IC_TEST2) v_b = -2.0 ? (i == 0) : 2.0;
+            
+			int i_temp = 0;
+			if(i) i_temp = par.nx_all-1;
+            
+			int sign = 1-2*(i%2);
+			for (unsigned int k = 0; k < par.nx_fict; ++k)
                 rho_u[i_temp+sign*k] = -rho_u[i_temp+sign*par.nx_fict];
-            int f_i_temp = 0;
-            if(i%2)
-                f_i_temp = par.nx;
-            F_m[f_i_temp] = v_b*rho[i_temp];
+            
+			int f_i_temp = 0;
+			if(i%2) f_i_temp = par.nx;
+            
+			F_m[f_i_temp] = v_b*rho[i_temp];
             F_imp[f_i_temp] = pow(v_b, 2)*rho[i_temp] + p[i_temp];
             F_e[f_i_temp] = (rho_e[i_temp] + p[i_temp]) * v_b * rho[i_temp];
         }
         else if (par.walls[i].type == FLUX)
         {
             int i_temp = 0;
-            if(i%2)
-                i_temp = par.nx_all-1;
-            int sign = 1-2*(i%2);
-            for (unsigned int k = 0; k < par.nx_fict; ++k)
+			if(i%2) i_temp = par.nx_all-1;
+            
+			int sign = 1-2*(i%2);
+			for (unsigned int k = 0; k < par.nx_fict; ++k)
                 rho_u[i_temp+sign*k] = rho_u[i_temp+sign*par.nx_fict];
-            int f_i_temp = 0;
-            if(i%2)
-                f_i_temp = par.nx;
-            F_m[f_i_temp] = rho_u[i_temp];
+            
+			int f_i_temp = 0;
+			if(i%2) f_i_temp = par.nx;
+            
+			F_m[f_i_temp] = rho_u[i_temp];
             F_imp[f_i_temp] = pow(rho_u[i_temp], 2) / rho[i_temp] + p[i_temp];
             F_e[f_i_temp] = (rho_e[i_temp] + p[i_temp]) * rho_u[i_temp] / rho[i_temp];
         }
@@ -202,14 +201,15 @@ void Solver_Godunov1D::set_initial_conditions()
 void Solver_Godunov1D::get_time_step()
 {
     double min_dt = 1.0e6;
-    for (unsigned int i = 1; i < par.nx_all; ++i)
+	for (unsigned int i = 1; i < par.nx_all; ++i)
     {
         double u = rho_u[i] / rho[i];
         double c = (rho[i] != 0.0) ? c = std::sqrt(par.gamma * p[i] / rho[i]) : 0.0;
         double dt_temp = par.CFL * par.dx / (c + fabs(u));
         if (dt_temp < min_dt) min_dt = dt_temp;
     }
-    dt = min_dt;
+    
+	dt = min_dt;
 }
 
 void Solver_Godunov1D::write_data()
@@ -231,7 +231,6 @@ void Solver_Godunov1D::write_data()
         x_out[i] = x[par.nx_fict + i];
 
         file << x_out[i] << " " << rho_out[i]  << " " << u_out[i] << " " << p_out[i] << "\n";
-
     }
 }
 
@@ -344,7 +343,7 @@ void choose_solution(Parameters par, \
     }
 }
 
-void godunov_flux(Parameters par, \
+void get_godunov_flux(Parameters par, \
                   double p_temp, double rho_temp, double u_temp, \
                   double& F_m, double& F_imp, double& F_e)
 {
@@ -353,7 +352,7 @@ void godunov_flux(Parameters par, \
     F_e = (p_temp + rho_temp * pow(u_temp, 2) / 2.0 + p_temp / (par.gamma - 1)) * u_temp;
 }
 
-void newton_iteration(Parameters par, \
+void make_newton_iteration(Parameters par, \
                       double p_l, double p_r, \
                       double u_l, double u_r, \
                       double rho_l, double rho_r, \
@@ -390,7 +389,7 @@ void newton_iteration(Parameters par, \
     }
 }
 
-void exact_solution(Solver_Godunov1D solver)
+void write_exact_solution(Solver_Godunov1D solver)
 {
     std::string file_name = "data/exact_solution.csv";
     std::ofstream file(file_name);
@@ -439,7 +438,7 @@ void exact_solution(Solver_Godunov1D solver)
     int N_iter = 20; // как в Toro, критерия по точности нет
     for (int k = 0; k < N_iter; ++k)
     {
-        newton_iteration(par, \
+        make_newton_iteration(par, \
                          p_l, p_r, \
                          u_l, u_r, \
                          rho_l, rho_r, \
@@ -468,7 +467,7 @@ void exact_solution(Solver_Godunov1D solver)
     }
 }
 
-void godunov_reconstruction(Parameters par, \
+void apply_godunov_reconstruction(Parameters par, \
                             double* rho_left, double* rho_right, \
                             double* rho_u_left, double* rho_u_right, \
                             double* rho_e_left, double* rho_e_right, \
@@ -489,7 +488,7 @@ void godunov_reconstruction(Parameters par, \
     }
 }
 
-void calc_all_flux(Parameters par, \
+void apply_godunov_method(Parameters par, \
                    double* F_m, double* F_imp, double* F_e, \
                    double* rho, double* rho_u, double* rho_e, double* p)
 {
@@ -501,7 +500,7 @@ void calc_all_flux(Parameters par, \
     double rho_u_right[par.nx_all + 1];
     double rho_e_right[par.nx_all + 1];
     double p_right[par.nx_all + 1];
-    godunov_reconstruction(par, \
+    apply_godunov_reconstruction(par, \
                            rho_left, rho_right, \
                            rho_u_left, rho_u_right, \
                            rho_e_left, rho_e_right, \
@@ -531,7 +530,7 @@ void calc_all_flux(Parameters par, \
         int N_iter = 20; // как в Toro, критерия по точности нет
         for (int k = 0; k < N_iter; ++k)
         {
-            newton_iteration(par, \
+            make_newton_iteration(par, \
                              p_l, p_r, \
                              u_l, u_r, \
                              rho_l, rho_r, \
@@ -560,7 +559,7 @@ void calc_all_flux(Parameters par, \
                         S, u_s, p_s, \
                         p_temp, rho_temp, u_temp);
         // Поток Годунова
-        godunov_flux(par, \
+        get_godunov_flux(par, \
                      p_temp, rho_temp, u_temp, \
                      F_m[i], F_imp[i], F_e[i]);
     }
