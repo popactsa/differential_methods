@@ -285,6 +285,6 @@ void Solver_Lagrange1D::write_data()
     double* c = rho;
     for(int i = par.nx_fict; i < par.nx_all - par.nx_fict; i++)
     {
-        file << x_grid[i] << " " << rho[i]  << " " << p[i] << " " << v_grid[i] << "\n";
+        file << x_grid[i] << " " << rho[i]  << " " << v_grid[i] << " " << p[i] << "\n";
     }
 }
