@@ -402,23 +402,32 @@ void write_exact_solution(Solver_Godunov1D solver)
     double p_l, p_r, u_l, u_r,rho_l, rho_r;
     if(par.ic_preset == IC_TEST1)
     {
-        p_l = 1.0;
-        p_r = 0.1;
         rho_l = 1.0;
-        rho_r = 0.125;
         u_l = 0.0;
+        p_l = 1.0;
+        rho_r = 0.125;
         u_r = 0.0;
+        p_r = 0.1;
     }
     else if(par.ic_preset == IC_TEST2)
     {
-        p_l = 0.4;
-        p_r = 0.4;
         rho_l = 1.0;
-        rho_r = 1.0;
         u_l = -2.0;
+        p_l = 0.4;
+        rho_r = 1.0;
         u_r = 2.0;
+        p_r = 0.4;
     }
-    else
+	else if(par.ic_preset == IC_TEST3)
+	{
+        rho_l = 1.0;
+        u_l = 0.0;
+		p_l = 1000.0;
+        rho_r = 1.0;
+        u_r = 0.0;
+        p_r = 0.01;
+	}
+	else
     {
         std::cerr << "Initial condition is not set: " << par.ic_preset << std::endl;
         exit(1);

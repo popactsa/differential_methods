@@ -7,8 +7,8 @@ unsignedint	nt	100
 bool	is_conservative	1
 VISC_types	banana	VISC_NEUMAN
 double	mu0	1.0
-Initial	banana	IC_TEST1
-Reconstruction	banana	Godunov
+initial	banana	IC_TEST3
+reconstruction	banana	Godunov
 wall	banana	0	{
 	type	FLUX
 }

@@ -25,12 +25,6 @@ Parameters::Parameters(std::string file_name) {
 		{"T", 1},
 		{"v_x", 2}
 	};
-	std::map<std::string, test_preset> test_preset_type_map {
-		{"TEST1", TEST1},
-		{"TEST2", TEST2},
-		{"TEST3", TEST3},
-		{"TEST4", TEST4}
-	};
 	std::map<std::string, IC_preset> IC_type_map = {
 		{"IC_TEST1", IC_TEST1},
 		{"IC_TEST2", IC_TEST2},
@@ -44,7 +38,7 @@ Parameters::Parameters(std::string file_name) {
 		{"VISC_LINEAR", VISC_LINEAR},
 		{"VISC_SUM", VISC_SUM}
 	};
-	std::map<std::string, Reconstruction> Reconstruction_map = {
+	std::map<std::string, Reconstruction> reconstruction_map = {
 		{"Godunov", Godunov},
 		{"Kolgan_1972", Kolgan_1972},
 		{"Kolgan_1975", Kolgan_1975},
@@ -81,17 +75,14 @@ Parameters::Parameters(std::string file_name) {
         	else if (strcmp(var_type.c_str(), "wall") == 0) // specific wall_type case
 				get_next_substr_between_sep(args_control, line, sep, curr_sep_pos);
 
-			else if (strcmp(var_type.c_str(), "Initial") == 0) // specific initial_condition case
+			else if (strcmp(var_type.c_str(), "initial") == 0) // specific initial_condition case
 				ic_preset = IC_type_map[var_value];
 
 			else if (strcmp(var_type.c_str(), "VISC_types") == 0) // specific viscosity case
 				viscosity = VISC_type_map[var_value];
             	
-			else if (strcmp(var_type.c_str(), "Reconstruction") == 0) // specific viscosity case
-				reconstruction = Reconstruction_map[var_value];
-
-            else if (strcmp(var_type.c_str(), "test") == 0) // specific test_preset case
-				test = test_preset_type_map[var_value];
+			else if (strcmp(var_type.c_str(), "reconstruction") == 0) // specific viscosity case
+				reconstruction_type = reconstruction_map[var_value];
 
             else if (strcmp(var_type.c_str(), "string") == 0)
 				*(std::string*)vars[var_name] = var_value;
@@ -163,8 +154,8 @@ Parameters::Parameters(const Parameters& rhs):
 	test(rhs.test),
 	ic_preset(rhs.ic_preset),
 	viscosity(rhs.viscosity),
-	mu0(rhs.mu0),	
-	reconstruction(rhs.reconstruction),
+	mu0(rhs.mu0),
+	reconstruction_type(rhs.reconstruction_type),
 	is_conservative(rhs.is_conservative),
 	gamma(rhs.gamma),
 	Cv(rhs.Cv),

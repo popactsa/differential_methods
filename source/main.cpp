@@ -4,7 +4,7 @@
 
 int main(int argv, char** argc)
 {
-	std::string params_file = "Parameters_file.txt";
+	std::string params_file = "params.txt";
 	Parameters par(params_file); // Parameters initialization by file;
 	Solver_Godunov1D solver(par);
 	if (argv > 1)
