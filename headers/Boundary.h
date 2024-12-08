@@ -1,5 +1,5 @@
-#ifndef WALL_H
-#define WALL_H
+#ifndef BOUNDARY_H
+#define BOUNDARY_H
 
 enum BoundaryType {
 	B_WALL,
