@@ -383,10 +383,9 @@ void make_newton_iteration(Parameters par, \
         dfr = rho_r / 4 * ((par.gamma + 1) * p_s + (3 * par.gamma + 1) * p_r) / pow(rho_r / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_r), 1.5);
     }
     p_s = p_s - (fl + fr - (u_l - u_r)) / (dfl + dfr);
-    if (p_s < 0.0)
-    {
+    
+	if (p_s < 0.0)
         p_s = 1e-6;
-    }
 }
 
 void write_exact_solution(Solver_Godunov1D solver)
@@ -454,15 +453,22 @@ void write_exact_solution(Solver_Godunov1D solver)
                          p_s);
     }
     // Волна разрежения
-    if (p_s <= p_l) fl = 2 * c_l / (par.gamma - 1) * (pow(p_s / p_l, (par.gamma - 1) / 2 / par.gamma) - 1);
+    if (p_s <= p_l)
+		fl = 2 * c_l / (par.gamma - 1) * (pow(p_s / p_l, (par.gamma - 1) / 2 / par.gamma) - 1);
+
     // Ударная волна
-    else fl = (p_s - p_l) / sqrt(rho_l / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_l));
+    else
+    	fl = (p_s - p_l) / sqrt(rho_l / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_l));
 
     // Волна разрежения
-    if (p_s <= p_r) fr = 2 * c_r / (par.gamma - 1) * (pow(p_s / p_r, (par.gamma - 1) / 2 / par.gamma) - 1);
-    // Ударная волна
-    else fr = (p_s - p_r) / sqrt(rho_r / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_r));
-    double u_s = 0.5 * (u_l + u_r + fr - fl);
+    if (p_s <= p_r)
+		fr = 2 * c_r / (par.gamma - 1) * (pow(p_s / p_r, (par.gamma - 1) / 2 / par.gamma) - 1);
+    
+	// Ударная волна
+    else
+		fr = (p_s - p_r) / sqrt(rho_r / 2 * ((par.gamma + 1) * p_s + (par.gamma - 1) * p_r));
+    
+	double u_s = 0.5 * (u_l + u_r + fr - fl);
     for(int i = par.nx_fict ; i < par.nx + par.nx_fict; i++)
     {
         double S = (x[i] - 0.5)/solver.t;
@@ -476,24 +482,108 @@ void write_exact_solution(Solver_Godunov1D solver)
     }
 }
 
-void apply_godunov_reconstruction(Parameters par, \
+double minmod(Reconstruction reconstruction_type, double a, double b)
+{
+	double grad;
+	double c;
+	switch (reconstruction_type) {
+		case KOLGAN72:
+			if (fabs(a) < fabs(b))
+				grad = a;
+			else
+				grad = b;
+			break;
+		
+		case KOLGAN75:
+			c = 0.5 * (a + b);
+			if ( (fabs(a) < fabs(b)) && (fabs(a) < fabs(c)) )
+				grad = a;
+			else if ( (fabs(b) < fabs(a)) && (fabs(b) < fabs(c)) )
+				grad = b;
+			else
+				grad = c;
+			break;
+		
+		case OSHER84:
+			if (pow(a, 2) < a*b)
+				grad = a;
+			else if (pow(b, 2) < a*b)
+				grad = b;
+			else
+				grad = 0.0;
+			break;
+	}
+
+	return grad;
+}
+
+void apply_reconstruction(Parameters par, \
                             double* rho_left, double* rho_right, \
                             double* rho_u_left, double* rho_u_right, \
                             double* rho_e_left, double* rho_e_right, \
                             double* p_left, double* p_right, \
                             double* rho, double* rho_u, double* rho_e, double* p)
 {
-    for (int i = 0; i < par.nx; ++i)
+    if (par.reconstruction_type == GODUNOV)
+	{
+		for (int i = 0; i < par.nx; ++i)
+    	{
+        	int i_temp = i + par.nx_fict;
+        	rho_left[i + 1] = rho[i_temp];
+        	rho_u_left[i + 1] = rho_u[i_temp];
+        	rho_e_left[i + 1] = rho_e[i_temp];
+        	p_left[i + 1] = p[i_temp];
+        	rho_right[i] = rho[i_temp];
+        	rho_u_right[i] = rho_u[i_temp];
+        	rho_e_right[i] = rho_e[i_temp];
+        	p_right[i] = p[i_temp];
+    	}
+	}
+
+	else if ((par.reconstruction_type == KOLGAN72) || \
+			(par.reconstruction_type == KOLGAN75) || \
+			(par.reconstruction_type == OSHER84))
+	{
+		double a_rho, b_rho;
+		double a_rho_u, b_rho_u;
+		double a_rho_e, b_rho_e;
+		double a_p, b_p;
+		double grad_rho, grad_rho_u, grad_rho_e, grad_p;
+
+		for (int i = 0; i < par.nx; ++i)
+		{
+			int i_temp = i + par.nx_fict;
+			
+			a_rho = rho[i_temp] - rho[i_temp - 1];
+			a_rho_u = rho_u[i_temp] - rho_u[i_temp - 1];
+			a_rho_e = rho_e[i_temp] - rho_e[i_temp - 1];
+			a_p = p[i_temp] - p[i_temp - 1];
+		
+			b_rho = rho[i_temp + 1] - rho[i_temp];
+			b_rho_u = rho_u[i_temp + 1] - rho_u[i_temp];
+			b_rho_e = rho_e[i_temp + 1] - rho_e[i_temp];
+			b_p = p[i_temp + 1] - p[i_temp];
+
+			grad_rho = minmod(par.reconstruction_type, a_rho, b_rho);
+			grad_rho_u = minmod(par.reconstruction_type, a_rho_u, b_rho_u);
+			grad_rho_e = minmod(par.reconstruction_type, a_rho_e, b_rho_e);
+			grad_p = minmod(par.reconstruction_type, a_p, b_p);
+
+			rho_left[i + 1] = rho[i_temp] + 0.5 * grad_rho;
+        	rho_u_left[i + 1] = rho_u[i_temp] + 0.5 * grad_rho_u;
+        	rho_e_left[i + 1] = rho_e[i_temp] + 0.5 * grad_rho_e;
+        	p_left[i + 1] = p[i_temp] + 0.5 * grad_p;
+        	rho_right[i] = rho[i_temp] - 0.5 * grad_rho;
+        	rho_u_right[i] = rho_u[i_temp] - 0.5 * grad_rho_u;
+        	rho_e_right[i] = rho_e[i_temp] - 0.5 * grad_rho_e;
+        	p_right[i] = p[i_temp] - 0.5 * grad_p;
+		}
+	}
+	
+	else
     {
-        int i_temp = i + par.nx_fict;
-        rho_left[i + 1] = rho[i_temp];
-        rho_u_left[i + 1] = rho_u[i_temp];
-        rho_e_left[i + 1] = rho_e[i_temp];
-        p_left[i + 1] = p[i_temp];
-        rho_right[i] = rho[i_temp];
-        rho_u_right[i] = rho_u[i_temp];
-        rho_e_right[i] = rho_e[i_temp];
-        p_right[i] = p[i_temp];
+        std::cerr << "Reconstruction type is not set!" << std::endl;
+        exit(1);
     }
 }
 
@@ -509,7 +599,7 @@ void apply_godunov_method(Parameters par, \
     double rho_u_right[par.nx_all + 1];
     double rho_e_right[par.nx_all + 1];
     double p_right[par.nx_all + 1];
-    apply_godunov_reconstruction(par, \
+    apply_reconstruction(par, \
                            rho_left, rho_right, \
                            rho_u_left, rho_u_right, \
                            rho_e_left, rho_e_right, \

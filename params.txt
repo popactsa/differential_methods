@@ -8,7 +8,7 @@ bool	is_conservative	1
 VISC_types	banana	VISC_NEUMAN
 double	mu0	1.0
 initial	banana	IC_TEST3
-reconstruction	banana	Godunov
+reconstruction	banana	GODUNOV
 wall	banana	0	{
 	type	FLUX
 }

@@ -39,10 +39,10 @@ Parameters::Parameters(std::string file_name) {
 		{"VISC_SUM", VISC_SUM}
 	};
 	std::map<std::string, Reconstruction> reconstruction_map = {
-		{"Godunov", Godunov},
-		{"Kolgan_1972", Kolgan_1972},
-		{"Kolgan_1975", Kolgan_1975},
-		{"Osher_1984", Osher_1984}
+		{"GODUNOV", GODUNOV},
+		{"KOLGAN72", KOLGAN72},
+		{"KOLGAN75", KOLGAN75},
+		{"OSHER84", OSHER84}
 	};
 
 	test = TEST_CUSTOM;

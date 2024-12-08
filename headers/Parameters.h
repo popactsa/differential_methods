@@ -37,10 +37,10 @@ enum VISC_types {
 };
 
 enum Reconstruction {
-	Godunov,
-	Kolgan_1972,
-	Kolgan_1975,
-	Osher_1984
+	GODUNOV,
+	KOLGAN72,
+	KOLGAN75,
+	OSHER84
 };
 
 struct Parameters {
