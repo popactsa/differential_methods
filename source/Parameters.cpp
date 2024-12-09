@@ -54,7 +54,6 @@ Parameters::Parameters(std::string file_name) {
 	};
 	
 	InitialPreset ic_test = IC_CUSTOM;
-	ArtificialViscosity viscosity_type = V_NONE;
 	
 	for (unsigned int i = 0; i < 2; ++i) boundaries[i].b_preset = B_CUSTOM;
 	
@@ -79,13 +78,13 @@ Parameters::Parameters(std::string file_name) {
 			else if (strcmp(var_type.c_str(), "unsignedint") == 0)
 			    *(unsigned int*)vars[var_name] = std::stoi(var_value);
 
-        	else if (strcmp(var_type.c_str(), "Boundary") == 0) // specific wall_type case
+	        	else if (strcmp(var_type.c_str(), "Boundary") == 0) // specific wall_type case
 				get_next_substr_between_sep(args_control, line, sep, curr_sep_pos);
 
 			else if (strcmp(var_type.c_str(), "InitialPreset") == 0) // specific initial_condition case
 				ic_preset = ic_type_map[var_value];
 
-			else if (strcmp(var_type.c_str(), "ArtificialViscosity") == 0) // specific viscosity case
+			else if (strcmp(var_type.c_str(), "ArtificialViscosity") == 0) // specific viscosity cases
 				viscosity_type = visc_type_map[var_value];
 
 			else if (strcmp(var_type.c_str(), "Reconstruction") == 0) // specific reconstruction case
@@ -100,53 +99,53 @@ Parameters::Parameters(std::string file_name) {
 			else if (strcmp(var_type.c_str(), "string") == 0)
 				*(std::string*)vars[var_name] = var_value;
 
-            else {
-				std::cerr << "Variable type is not identified: " << var_name << " " << var_type << std::endl;
-				exit(1);
-			}
-
-            if (strcmp(args_control.c_str(), "{") == 0) { // assign wall values if provided
-				std::string opening, arg_name, arg_value;
-				for (std::getline(fin, line);; std::getline(fin, line)) {
-					curr_sep_pos = 0;
-					get_next_substr_between_sep(opening, line, sep, curr_sep_pos);
-					if (strcmp(opening.c_str(), "}") == 0) break;
-					get_next_substr_between_sep(arg_name, line, sep, curr_sep_pos);
-					get_next_substr_between_sep(arg_value, line, sep, curr_sep_pos);
-					if (strcmp(var_type.c_str(), "Boundary") == 0) {
-						if (arg_name == "type")
-							boundaries[std::stoul(var_value)].b_type = boundary_type_map[arg_value];
-						
-						else if (arg_name == "T")
-							boundaries[std::stoul(var_value)].T = std::stod(arg_value);
-						
-						else if (arg_name == "v_x")
-							boundaries[std::stoul(var_value)].v_x = std::stod(arg_value);
-						
-						else {
-							std::cerr << "Boundary " << var_value << " arg type not found (" << arg_name << ")" << std::endl;
-							exit(1);
+	            else {
+					std::cerr << "Variable type is not identified: " << var_name << " " << var_type << std::endl;
+					exit(1);
+				}
+	
+	            if (strcmp(args_control.c_str(), "{") == 0) { // assign wall values if provided
+					std::string opening, arg_name, arg_value;
+					for (std::getline(fin, line);; std::getline(fin, line)) {
+						curr_sep_pos = 0;
+						get_next_substr_between_sep(opening, line, sep, curr_sep_pos);
+						if (strcmp(opening.c_str(), "}") == 0) break;
+						get_next_substr_between_sep(arg_name, line, sep, curr_sep_pos);
+						get_next_substr_between_sep(arg_value, line, sep, curr_sep_pos);
+						if (strcmp(var_type.c_str(), "Boundary") == 0) {
+							if (arg_name == "type")
+								boundaries[std::stoul(var_value)].b_type = boundary_type_map[arg_value];
+							
+							else if (arg_name == "T")
+								boundaries[std::stoul(var_value)].T = std::stod(arg_value);
+							
+							else if (arg_name == "v_x")
+								boundaries[std::stoul(var_value)].v_x = std::stod(arg_value);
+							
+							else {
+								std::cerr << "Boundary " << var_value << " arg type not found (" << arg_name << ")" << std::endl;
+								exit(1);
+							}
+							std::cout << "Boundary " << var_value << " : " << arg_name << "," << arg_value << std::endl;
 						}
-						std::cout << "Boundary " << var_value << " : " << arg_name << "," << arg_value << std::endl;
 					}
 				}
+				std::cout << var_type << " " << var_name << " " << var_value << std::endl;
 			}
-			std::cout << var_type << " " << var_name << " " << var_value << std::endl;
+			dx = (x_end - x_start) / nx;
+			nx_all = nx + 2 * nx_fict;
+			Cv = R / (gamma - 1.0);
+			Cp = Cv + R;
+			
+			if (ic_test != IC_CUSTOM) {
+				ic_preset = InitialPreset(ic_test);
+				for (unsigned int i = 0; i < 2; ++i) {
+					boundaries[i].b_preset = BoundaryPreset(ic_test); // it's easier to specify further boundary values in solver,
+											  // than to add many elif cases here //
+											  // assigned boundary values don't matter
+											  // i'm sorry
+			}
 		}
-		dx = (x_end - x_start) / nx;
-		nx_all = nx + 2 * nx_fict;
-		Cv = R / (gamma - 1.0);
-		Cp = Cv + R;
-		
-		if (ic_test != IC_CUSTOM) {
-			ic_preset = InitialPreset(ic_test);
-			for (unsigned int i = 0; i < 2; ++i) {
-				boundaries[i].b_preset = BoundaryPreset(ic_test); // it's easier to specify further boundary values in solver,
-										  // than to add many elif cases here //
-										  // assigned boundary values don't matter
-										  // i'm sorry
-			};
-		};
 	}
 	else {
 		std::cerr << "Can't open the file: " << file_name << std::endl;
@@ -155,27 +154,27 @@ Parameters::Parameters(std::string file_name) {
 	fin.close();
 };
 
-Parameters::Parameters(const Parameters& rhs):
-	x_start(rhs.x_start),
-	x_end(rhs.x_end),
-	nx(rhs.nx),
-	dx(rhs.dx),
-	nx_fict(rhs.nx_fict),
-	nx_all(rhs.nx_all),
-	CFL(rhs.CFL),
-	nt(rhs.nt),
-	ic_preset(rhs.ic_preset),
-	viscosity_type(rhs.viscosity_type),
-	mu0(rhs.mu0),
-	reconstruction_type(rhs.reconstruction_type),
-	time_algo(rhs.time_algo),
-	flux_scheme(rhs.flux_scheme),
-	is_conservative(rhs.is_conservative),
-	gamma(rhs.gamma),
-	Cv(rhs.Cv),
-	Cp(rhs.Cp),
-	nt_write(rhs.nt_write),
-	write_file(rhs.write_file)
-{
-	std::copy(std::begin(rhs.boundaries), std::end(rhs.boundaries), std::begin(boundaries));
-};
+// Parameters::Parameters(const Parameters& rhs):
+// 	x_start(rhs.x_start),
+// 	x_end(rhs.x_end),
+// 	nx(rhs.nx),
+// 	dx(rhs.dx),
+// 	nx_fict(rhs.nx_fict),
+// 	nx_all(rhs.nx_all),
+// 	CFL(rhs.CFL),
+// 	nt(rhs.nt),
+// 	ic_preset(rhs.ic_preset),
+// 	viscosity_type(rhs.viscosity_type),
+// 	mu0(rhs.mu0),
+// 	reconstruction_type(rhs.reconstruction_type),
+// 	time_algo(rhs.time_algo),
+// 	flux_scheme(rhs.flux_scheme),
+// 	is_conservative(rhs.is_conservative),
+// 	gamma(rhs.gamma),
+// 	Cv(rhs.Cv),
+// 	Cp(rhs.Cp),
+// 	nt_write(rhs.nt_write),
+// 	write_file(rhs.write_file)
+// {
+// 	std::copy(std::begin(rhs.boundaries), std::end(rhs.boundaries), std::begin(boundaries));
+// };

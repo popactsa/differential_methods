@@ -70,8 +70,10 @@ struct Parameters {
 	unsigned int nt_write;
 	std::string write_file;
 
+	inline void print() {std::cout << viscosity_type << std::endl;}
+	Parameters(const Parameters&) = default;
 	Parameters(std::string);
-	Parameters(const Parameters& rhs);
+//	Parameters(const Parameters& rhs);
 };
 
 #endif
