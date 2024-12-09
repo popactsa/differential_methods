@@ -37,7 +37,7 @@ Solver_Lagrange1D::~Solver_Lagrange1D()
 void Solver_Lagrange1D::apply_boundary_conditions()
 {
     // velocity
-    for (unsigned int i = 0; i < 2; ++i)   // 1D -> 2 walls
+    for (int i = 0; i < 2; ++i)   // 1D -> 2 walls
     {
         if (par.boundaries[i].b_type == B_WALL)
         {
@@ -70,7 +70,7 @@ void Solver_Lagrange1D::apply_boundary_conditions()
             v[i_temp + (1 - 2 * i)] = v[i_temp + (1 - 2 * i) * 2];
         }
     }
-    for (unsigned int i = 0; i < par.nx_fict; ++i)
+    for (int i = 0; i < par.nx_fict; ++i)
     {
         rho[i] = rho[par.nx_fict];
         rho[par.nx_all - par.nx_fict - i] = rho[par.nx_all - par.nx_fict - 1];
@@ -84,35 +84,35 @@ void Solver_Lagrange1D::solve_step()
     apply_boundary_conditions();
     get_time_step();
     double v_last[par.nx_all + 1];
-    for(unsigned int i = 0; i < par.nx_all + 1; i++)
+    for(int i = 0; i < par.nx_all + 1; ++i)
     {
         v_last[i] = v[i];
     }
     if (par.viscosity_type == V_NONE)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
             omega[i] = 0.0;
     }
     else if (par.viscosity_type == V_NEUMAN)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
             omega[i] = -par.mu0*rho[i]*fabs(v[i+1] - v[i])*(v[i+1] - v[i]);
     }
     else if (par.viscosity_type == V_LATTER)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
             omega[i] = ((v[i+1] - v[i]) < 0.0) ? par.mu0*rho[i]*(v[i+1] - v[i])*(v[i+1] - v[i]) : 0.0;
     }
     else if (par.viscosity_type == V_LINEAR)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
 	  {
             omega[i] = par.mu0 * rho[i] * (v[i + 1] - v[i]) * m[i];
 	  }
     }
     else if (par.viscosity_type == V_SUM)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
 	  {
             omega[i] = par.mu0 * rho[i] * (v[i + 1] - v[i]) * m[i] - par.mu0 * rho[i]*fabs(v[i+1] - v[i])*(v[i+1] - v[i]);
 	  }
@@ -123,19 +123,19 @@ void Solver_Lagrange1D::solve_step()
         exit(1);
     }
 
-    for (unsigned int i = 1 + par.nx_fict; i < par.nx_all - par.nx_fict; ++i)
+    for (int i = 1 + par.nx_fict; i < par.nx_all - par.nx_fict; ++i)
     {
         double dx = 0.5 * (m[i] + m[i - 1]);
         v[i] = v[i] - ((p[i] + omega[i]) - (p[i - 1] + omega[i - 1])) * dt / dx;
     }
-    for (unsigned int i = 0; i < par.nx_all + 1; ++i) x[i] += v[i] * dt;
+    for (int i = 0; i < par.nx_all + 1; ++i) x[i] += v[i] * dt;
 
     double pc[par.nx_all];
-    for(unsigned int i = 1; i < par.nx_all; i++)
+    for(int i = 1; i < par.nx_all; ++i)
     {
         pc[i] = 0.5 * (p[i] + omega[i] + p[i-1] + omega[i-1]);
     }
-    for (unsigned int i = par.nx_fict; i < par.nx_all - par.nx_fict; ++i)
+    for (int i = par.nx_fict; i < par.nx_all - par.nx_fict; ++i)
     {
         rho[i] = rho[i] / (rho[i] * (v[i + 1] - v[i]) * dt / m[i] + 1.0);
         if (par.is_conservative) 
@@ -146,7 +146,7 @@ void Solver_Lagrange1D::solve_step()
 	  }
         else U[i] = U[i] / (rho[i] * (v[i + 1] - v[i]) * (par.gamma - 1.0) * dt / m[i] + 1.0);
     }
-    for (unsigned int i = 0; i < par.nx_all; ++i)
+    for (int i = 0; i < par.nx_all; ++i)
     {
         p[i] = rho[i] * (par.gamma - 1.0) * U[i];
     }
@@ -156,7 +156,7 @@ void Solver_Lagrange1D::set_initial_conditions()
 {
     if (par.ic_preset == IC_TEST1)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
         {
             if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
             {
@@ -170,7 +170,7 @@ void Solver_Lagrange1D::set_initial_conditions()
             }
             U[i] = p[i] / (par.gamma - 1.0) / rho[i];
         }
-        for (unsigned int i = 0; i < par.nx_all + 1; ++i)
+        for (int i = 0; i < par.nx_all + 1; ++i)
         {
             v[i] = 0.0;
             x[i] = par.x_start + (i - par.nx_fict) * par.dx;
@@ -178,13 +178,13 @@ void Solver_Lagrange1D::set_initial_conditions()
     }
     else if (par.ic_preset == IC_TEST2)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
         {
             p[i] = 0.4;
             rho[i] = 1.0;
             U[i] = p[i] / (par.gamma - 1.0) / rho[i];
         };
-        for (unsigned int i = 0; i < par.nx_all + 1; ++i)
+        for (int i = 0; i < par.nx_all + 1; ++i)
         {
             if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
             {
@@ -199,7 +199,7 @@ void Solver_Lagrange1D::set_initial_conditions()
     }
     else if (par.ic_preset == IC_TEST3)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
         {
             if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
             {
@@ -213,7 +213,7 @@ void Solver_Lagrange1D::set_initial_conditions()
             }
             U[i] = p[i] / (par.gamma - 1.0) / rho[i];
         };
-        for (unsigned int i = 0; i < par.nx_all + 1; ++i)
+        for (int i = 0; i < par.nx_all + 1; ++i)
         {
             v[i] = 0.0;
             x[i] = par.x_start - par.nx_fict * par.dx + i * par.dx;
@@ -221,7 +221,7 @@ void Solver_Lagrange1D::set_initial_conditions()
     }
     else if (par.ic_preset == IC_TEST4)
     {
-        for (unsigned int i = 0; i < par.nx_all; ++i)
+        for (int i = 0; i < par.nx_all; ++i)
         {
             if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
             {
@@ -235,7 +235,7 @@ void Solver_Lagrange1D::set_initial_conditions()
             }
             U[i] = p[i] / (par.gamma - 1.0) / rho[i];
         };
-        for (unsigned int i = 0; i < par.nx_all + 1; ++i)
+        for (int i = 0; i < par.nx_all + 1; ++i)
         {
             if (i * par.dx <= par.x_start + 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx)
             {
@@ -253,13 +253,13 @@ void Solver_Lagrange1D::set_initial_conditions()
         std::cerr << "Initial condition is not set: " << par.ic_preset << std::endl;
         exit(1);
     };
-    for (unsigned int i = 0; i < par.nx_all; ++i) m[i] = rho[i] * (x[i + 1] - x[i]);
+    for (int i = 0; i < par.nx_all; ++i) m[i] = rho[i] * (x[i + 1] - x[i]);
 };
 
 void Solver_Lagrange1D::get_time_step()
 {
     double min_dt = 1.0e6;
-    for (unsigned int i = 1; i < par.nx_all; ++i)
+    for (int i = 1; i < par.nx_all; ++i)
     {
         double dx = x[i+1] - x[i];
         double V = 0.5*(v[i+1] + v[i]);
@@ -277,13 +277,13 @@ void Solver_Lagrange1D::write_data()
     std::ofstream file(file_name);
     double x_grid[par.nx_all];
     double v_grid[par.nx_all];
-    for(unsigned int i = 0; i < par.nx_all; i++)
+    for(int i = 0; i < par.nx_all; ++i)
     {
         x_grid[i] = 0.5*(x[i+1] + x[i]);
         v_grid[i] = 0.5*(v[i+1] + v[i]);
     }
     double* c = rho;
-    for(int i = par.nx_fict; i < par.nx_all - par.nx_fict; i++)
+    for(int i = par.nx_fict; i < par.nx_all - par.nx_fict; ++i)
     {
         file << x_grid[i] << " " << rho[i]  << " " << v_grid[i] << " " << p[i] << "\n";
     }

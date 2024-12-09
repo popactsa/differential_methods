@@ -48,12 +48,12 @@ enum FluxScheme {
 
 struct Parameters {
 	double x_start, x_end;
-	unsigned int nx; // amount of x ceils
+	int nx; // amount of x ceils
 	double dx;
-	unsigned int nx_fict;
-	unsigned int nx_all;
+	int nx_fict;
+	int nx_all;
 	double CFL;
-	unsigned int nt;
+	int nt;
 	Boundary boundaries[2]; // only 2 walls for 1D situation
 	InitialPreset ic_preset;
 	ArtificialViscosity viscosity_type;
@@ -67,7 +67,7 @@ struct Parameters {
 	double Cv;
 	double Cp;
 
-	unsigned int nt_write;
+	int nt_write;
 	std::string write_file;
 
 	inline void print() {std::cout << viscosity_type << std::endl;}

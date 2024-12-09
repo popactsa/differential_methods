@@ -9,7 +9,7 @@ class Solver_Lagrange1D: public iSolver {
 	double *p, *rho, *U, *m;
 	double *v, *x;
 	double t, dt;
-	unsigned int step; // current time step
+	int step; // current time step
 	double *omega; // viscosity
 public:
 	Solver_Lagrange1D(const Parameters& _par);

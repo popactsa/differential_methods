@@ -3,6 +3,6 @@
 
 #include <iostream>
 
-void get_next_substr_between_sep (std::string&, const std::string&, const std::string, unsigned int&);
+void get_next_substr_between_sep (std::string&, const std::string&, const std::string, int&);
 
 #endif

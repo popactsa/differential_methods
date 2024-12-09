@@ -8,8 +8,8 @@ int main(int argv, char** argc)
 	std::string params_file = "params.txt";
 	Parameters par(params_file); // Parameters initialization by file;
 	par.print();
-	Solver_Lagrange1D solver(par);
-//	Solver_Godunov1D solver(par);
+	//Solver_Lagrange1D solver(par);
+	Solver_Godunov1D solver(par);
 	if (argv > 1)
 		return 0;
 	system("python Post.py");

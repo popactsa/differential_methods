@@ -20,7 +20,7 @@ Parameters::Parameters(std::string file_name) {
 		{"WALL", B_WALL},
 		{"FLUX", B_FLUX},
 	};
-	std::map<std::string, unsigned short int> boundary_args = {
+	std::map<std::string, int> boundary_args = {
 		{"BoundaryType", 0},
 		{"T", 1},
 		{"v_x", 2},
@@ -55,13 +55,13 @@ Parameters::Parameters(std::string file_name) {
 	
 	InitialPreset ic_test = IC_CUSTOM;
 	
-	for (unsigned int i = 0; i < 2; ++i) boundaries[i].b_preset = B_CUSTOM;
+	for (int i = 0; i < 2; ++i) boundaries[i].b_preset = B_CUSTOM;
 	
 	if (fin.is_open()) {
 		std::string line;
 		const std::string sep = "\t";
 		for (std::getline(fin, line); !fin.eof(); std::getline(fin, line)) {
-			unsigned int curr_sep_pos = 0;
+			int curr_sep_pos = 0;
 			std::string var_type, var_name, var_value; // var_number used if index for any
 													   // array element is needed
 			std::string args_control; // control if there are any additional args will be provided
@@ -75,8 +75,8 @@ Parameters::Parameters(std::string file_name) {
 			else if (strcmp(var_type.c_str(), "bool") == 0)
 				*(bool*)vars[var_name] = std::stoi(var_value);
 
-			else if (strcmp(var_type.c_str(), "unsignedint") == 0)
-			    *(unsigned int*)vars[var_name] = std::stoi(var_value);
+			else if (strcmp(var_type.c_str(), "int") == 0)
+			    *(int*)vars[var_name] = std::stoi(var_value);
 
 	        	else if (strcmp(var_type.c_str(), "Boundary") == 0) // specific wall_type case
 				get_next_substr_between_sep(args_control, line, sep, curr_sep_pos);
@@ -139,7 +139,7 @@ Parameters::Parameters(std::string file_name) {
 			
 			if (ic_test != IC_CUSTOM) {
 				ic_preset = InitialPreset(ic_test);
-				for (unsigned int i = 0; i < 2; ++i) {
+				for (int i = 0; i < 2; ++i) {
 					boundaries[i].b_preset = BoundaryPreset(ic_test); // it's easier to specify further boundary values in solver,
 											  // than to add many elif cases here //
 											  // assigned boundary values don't matter
