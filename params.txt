@@ -3,7 +3,7 @@ double	x_end	1.0
 unsignedint	nx	100
 unsignedint	nx_fict	1
 double	CFL	0.5
-unsignedint	nt	50
+unsignedint	nt	100
 bool	is_conservative	1
 ArtificialViscosity	banana	NEUMAN
 double	mu0	1.0

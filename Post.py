@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-step = 49
+step = 99
 file_name = "data/" + str(step) + ".csv"
 file_sol = "data/exact_solution.csv"
 data = pd.read_csv(file_name, sep = ' ', header=None)
