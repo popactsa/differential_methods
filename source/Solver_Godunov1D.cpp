@@ -4,29 +4,29 @@
 
 Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
 {
-    p = new double[par.nx_all];
-    rho = new double[par.nx_all];
-    rho_u = new double[par.nx_all];
-    rho_e = new double[par.nx_all];
-    x = new double[par.nx_all + 1];
-    F_m = new double[par.nx + 1];
-    F_imp = new double[par.nx + 1];
-    F_e = new double[par.nx + 1];
-    // Начальные условия
-    set_initial_conditions();
-    t = 0.0;
-    for (step = 1; step <= par.nt; ++step)
-    {
-        // Решение на текущем шаге
-        solve_step();
-        if (step % par.nt_write == 0)
-            write_data();
+p = new double[par.nx_all];
+rho = new double[par.nx_all];
+rho_u = new double[par.nx_all];
+rho_e = new double[par.nx_all];
+x = new double[par.nx_all + 1];
+F_m = new double[par.nx + 1];
+F_imp = new double[par.nx + 1];
+F_e = new double[par.nx + 1];
+// Начальные условия
+set_initial_conditions();
+t = 0.0;
+for (step = 1; step <= par.nt; ++step)
+{
+    // Решение на текущем шаге
+    solve_step();
+    if (step % par.nt_write == 0)
+        write_data();
 
-		if(step == par.nt)
-			write_exact_solution(*this);
-    }
-    // Конец расчета
-    std::cout << "\nDone" << std::endl;
+  	if(step == par.nt)
+  		write_exact_solution(*this);
+}
+// Конец расчета
+std::cout << "\nDone" << std::endl;
 }
 
 Solver_Godunov1D::~Solver_Godunov1D()

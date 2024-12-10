@@ -153,28 +153,3 @@ Parameters::Parameters(std::string file_name) {
 	}
 	fin.close();
 };
-
-// Parameters::Parameters(const Parameters& rhs):
-// 	x_start(rhs.x_start),
-// 	x_end(rhs.x_end),
-// 	nx(rhs.nx),
-// 	dx(rhs.dx),
-// 	nx_fict(rhs.nx_fict),
-// 	nx_all(rhs.nx_all),
-// 	CFL(rhs.CFL),
-// 	nt(rhs.nt),
-// 	ic_preset(rhs.ic_preset),
-// 	viscosity_type(rhs.viscosity_type),
-// 	mu0(rhs.mu0),
-// 	reconstruction_type(rhs.reconstruction_type),
-// 	time_algo(rhs.time_algo),
-// 	flux_scheme(rhs.flux_scheme),
-// 	is_conservative(rhs.is_conservative),
-// 	gamma(rhs.gamma),
-// 	Cv(rhs.Cv),
-// 	Cp(rhs.Cp),
-// 	nt_write(rhs.nt_write),
-// 	write_file(rhs.write_file)
-// {
-// 	std::copy(std::begin(rhs.boundaries), std::end(rhs.boundaries), std::begin(boundaries));
-// };
