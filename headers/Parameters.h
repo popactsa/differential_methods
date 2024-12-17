@@ -61,6 +61,7 @@ struct Parameters {
 	TimeAlgo time_algo;
 	FluxScheme flux_scheme;
 	bool is_conservative;
+	double Q;
 	double mu0;
 
 	double gamma;

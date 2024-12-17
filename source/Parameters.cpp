@@ -15,6 +15,7 @@ Parameters::Parameters(std::string file_name) {
 		{"gamma", &gamma},
 		{"is_conservative", &is_conservative},
 		{"mu0", &mu0},
+		{"Q", &Q}
 	};
 	std::map<std::string, BoundaryType> boundary_type_map = {
 		{"WALL", B_WALL},

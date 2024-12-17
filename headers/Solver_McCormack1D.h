@@ -10,6 +10,7 @@ class Solver_McCormack1D: public Solver_Godunov1D
 	public:
 		Solver_McCormack1D(const Parameters& _par);
 		void solve_step() override;
+		void get_diffusion(double *sudp, double *um, double *u_, double *up, int size);
 		~Solver_McCormack1D();
 	private:
 		constexpr static double a[2]{0.0, 1.0};
@@ -20,6 +21,7 @@ class Solver_McCormack1D: public Solver_Godunov1D
 		double* Flux[3];
 		double* u[3];
 		double* p_temp;
+
 };
 
 #endif
