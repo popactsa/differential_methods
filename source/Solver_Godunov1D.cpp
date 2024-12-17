@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 
-Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
+Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par, bool to_solve): par(_par)
 {
 p = new double[par.nx_all];
 rho = new double[par.nx_all];
@@ -15,15 +15,18 @@ F_e = new double[par.nx + 1];
 // Начальные условия
 set_initial_conditions();
 t = 0.0;
-for (step = 1; step <= par.nt; ++step)
+if (to_solve)
 {
-    // Решение на текущем шаге
-    solve_step();
-    if (step % par.nt_write == 0)
-        write_data();
-
-  	if(step == par.nt)
-  		write_exact_solution(*this);
+	for (step = 1; step <= par.nt; ++step)
+	{
+    	// Решение на текущем шаге
+    	solve_step();
+    	if (step % par.nt_write == 0)
+    	    write_data();
+	
+  		if(step == par.nt)
+  			write_exact_solution(*this);
+	}
 }
 // Конец расчета
 std::cout << "\nDone" << std::endl;

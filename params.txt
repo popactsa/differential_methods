@@ -1,7 +1,7 @@
 double	x_start	0.0
 double	x_end	1.0
 int	nx	100
-int	nx_fict	1
+int	nx_fict	2
 double	CFL	0.5
 int	nt	50
 bool	is_conservative	1
