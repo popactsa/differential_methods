@@ -52,6 +52,7 @@ Parameters::Parameters(std::string file_name) {
 		{"GODUNOV", F_GODUNOV},
 		{"RLF", F_RLF},
 	};
+
 	
 	InitialPreset ic_test = IC_CUSTOM;
 	

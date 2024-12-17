@@ -2,7 +2,8 @@
 #include <algorithm>
 #include <cmath>
 
-Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par): par(_par)
+Solver_Godunov1D::Solver_Godunov1D(const Parameters& _par, bool to_solve)
+	: par(_par)
 {
 p = new double[par.nx_all];
 rho = new double[par.nx_all];
@@ -12,6 +13,8 @@ x = new double[par.nx_all + 1];
 F_m = new double[par.nx + 1];
 F_imp = new double[par.nx + 1];
 F_e = new double[par.nx + 1];
+if (!to_solve)
+{
 // Начальные условия
 set_initial_conditions();
 t = 0.0;
@@ -26,7 +29,9 @@ for (step = 1; step <= par.nt; ++step)
   		write_exact_solution(*this);
 }
 // Конец расчета
-std::cout << "\nDone" << std::endl;
+std::cout << "\nDone Godunov" << std::endl;
+
+}
 }
 
 Solver_Godunov1D::~Solver_Godunov1D()
@@ -202,6 +207,19 @@ void Solver_Godunov1D::set_initial_conditions()
             x[i] = (i + 0.5 - par.nx_fict) * par.dx;
         }
     }
+    else if (par.ic_preset == IC_TEST4)
+    {
+        for (int i = 0; i < par.nx_all; ++i)
+        {
+            // p[i] = i * par.dx <= 0.5 * (par.x_end - par.x_start) + par.nx_fict * par.dx ? 0.2 : 0.1;
+		p[i] = 0.1;
+            // rho[i] = 1.0;
+		rho[i] = 3.0 + std::sin((i + 0.5 - par.nx_fict)*par.dx*10.0);
+            rho_e[i] = rho[i] * ((pow(1.0, 2)) / 2.0  + p[i] / (par.gamma - 1.0) / rho[i]);
+            rho_u[i] = rho[i] * 1.0;
+            x[i] = (i + 0.5 - par.nx_fict) * par.dx;
+        }
+    }
     else
     {
         std::cerr << "\nERROR: Initial condition is not set: " << par.ic_preset << std::endl;
@@ -243,6 +261,7 @@ void Solver_Godunov1D::write_data()
 
         file << x_out[i] << " " << rho_out[i]  << " " << u_out[i] << " " << p_out[i] << "\n";
     }
+    file.close();
 }
 
 void Solver_Godunov1D::get_godunov_flux(double p_temp, double rho_temp, double u_temp, \
@@ -588,6 +607,15 @@ void write_exact_solution(Solver_Godunov1D& solver)
         rho_r = 1.0;
         u_r = 0.0;
         p_r = 0.01;
+	}
+	else if(par.ic_preset == IC_TEST4)
+	{
+        rho_l = 1.0;
+        u_l = 0.0;
+		p_l = 0.2;
+        rho_r = 1.0;
+        u_r = 0.0;
+        p_r = 0.1;
 	}
 	else
     {

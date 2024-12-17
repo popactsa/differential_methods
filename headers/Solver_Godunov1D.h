@@ -14,12 +14,12 @@ public:
     int step;
     double *F_m, *F_imp, *F_e;
 
-	Solver_Godunov1D(const Parameters& _par);
-    void apply_boundary_conditions();
-    void solve_step();
-    void set_initial_conditions();
-    void get_time_step();
-    void write_data();
+	Solver_Godunov1D(const Parameters& _par, bool = false);
+    virtual void apply_boundary_conditions();
+    virtual void solve_step();
+    virtual void set_initial_conditions();
+    virtual void get_time_step();
+    virtual void write_data();
 	void get_godunov_flux(double p_temp, double rho_temp, double u_temp, \
 					  double& F_m, double& F_imp, double& F_e);
 	void apply_reconstruction(double* rho_left, double* rho_right, \
@@ -30,7 +30,7 @@ public:
 	void apply_godunov_method(double* F_m, double* F_imp, double* F_e, \
 						  double* rho, double* rho_u, double* rho_e, double* p);
 
-    ~Solver_Godunov1D();
+	virtual ~Solver_Godunov1D();
 };
 
 void make_newton_iteration(Parameters par, \
