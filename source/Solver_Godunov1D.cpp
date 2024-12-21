@@ -18,15 +18,18 @@ if (!to_solve)
 // Начальные условия
 set_initial_conditions();
 t = 0.0;
-for (step = 1; step <= par.nt; ++step)
+if (to_solve)
 {
-    // Решение на текущем шаге
-    solve_step();
-    if (step % par.nt_write == 0)
-        write_data();
-
-  	if(step == par.nt)
-  		write_exact_solution(*this);
+	for (step = 1; step <= par.nt; ++step)
+	{
+    	// Решение на текущем шаге
+    	solve_step();
+    	if (step % par.nt_write == 0)
+    	    write_data();
+	
+  		if(step == par.nt)
+  			write_exact_solution(*this);
+	}
 }
 // Конец расчета
 std::cout << "\nDone Godunov" << std::endl;
