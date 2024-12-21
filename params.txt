@@ -3,19 +3,19 @@ double	x_end	1.0
 int	nx	100
 int	nx_fict	2
 double	CFL	0.5
-int	nt	50
+int	nt	20
 bool	is_conservative	1
 ArtificialViscosity	banana	NEUMAN
 double	mu0	1.0
-InitialPreset	banana	TEST3
+InitialPreset	banana	TEST1
 Reconstruction	banana	GODUNOV
 TimeAlgo	banana	EULER
 FluxScheme	banana	GODUNOV
 Boundary	banana	0	{
-	type	FLUX
+	type	WALL
 }
 Boundary	banana	1	{
-	type	FLUX
+	type	WALL
 }
 double	gamma	1.4
 int	nt_write	1

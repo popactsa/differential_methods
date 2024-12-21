@@ -14,8 +14,8 @@ public:
     int step;
     double *F_m, *F_imp, *F_e;
 
-	Solver_Godunov1D(const Parameters& _par, bool to_solve = true);
-    void apply_boundary_conditions();
+	Solver_Godunov1D(const Parameters& _par, bool = false);
+    virtual void apply_boundary_conditions();
     virtual void solve_step();
     virtual void set_initial_conditions();
     virtual void get_time_step();
@@ -30,7 +30,7 @@ public:
 	void apply_godunov_method(double* F_m, double* F_imp, double* F_e, \
 						  double* rho, double* rho_u, double* rho_e, double* p);
 
-    virtual ~Solver_Godunov1D();
+	virtual ~Solver_Godunov1D();
 };
 
 void make_newton_iteration(Parameters par, \

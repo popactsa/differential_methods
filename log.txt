@@ -1,0 +1,14 @@
+==111863== Memcheck, a memory error detector
+==111863== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+==111863== Using Valgrind-3.24.0 and LibVEX; rerun with -h for copyright info
+==111863== Command: ./main
+==111863== Parent PID: 1593
+==111863== 
+==111863== 
+==111863== HEAP SUMMARY:
+==111863==     in use at exit: 0 bytes in 0 blocks
+==111863==   total heap usage: 148 allocs, 148 frees, 467,995 bytes allocated
+==111863== 
+==111863== All heap blocks were freed -- no leaks are possible
+==111863== 
+==111863== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
