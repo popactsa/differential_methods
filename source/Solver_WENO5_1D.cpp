@@ -1,14 +1,12 @@
 #include "Solver_WENO5_1D.h"
-#include <algorithm>
-#include <cmath>
 
-Solver_WENO5_1D::Solver_WENO5_1D(const Parameters& _par): Solver_Godunov1D(_par, false)
+Solver_WENO5_1D::Solver_WENO5_1D(const Parameters& _par):
+     Solver_Godunov1D(_par, false)
 {
 	for (step = 1; step <= par.nt; ++step)
 	{
     	// Решение на текущем шаге
     	solve_step();
-    	
 		if (step % par.nt_write == 0)
         	write_data();
 
@@ -16,7 +14,7 @@ Solver_WENO5_1D::Solver_WENO5_1D(const Parameters& _par): Solver_Godunov1D(_par,
   			write_exact_solution(*this);
 	}
 // Конец расчета
-std::cout << "\nDone" << std::endl;
+std::cout << "\nDone WENO5" << std::endl;
 }
 
 void Solver_WENO5_1D::get_WENO_reconstruction(double* flux, int n_borders, double* out_arr, int size1)
@@ -30,17 +28,17 @@ void Solver_WENO5_1D::get_WENO_reconstruction(double* flux, int n_borders, doubl
 	double hr[n_borders] = {};
 
 	double epsilon = 1E-40;
-	
+
 	double alpha_tmp[3] = {};
 	double omega_tmp[3] = {};
 	double gamma_tmp[3] = {3.0/10, 3.0/5, 1.0/10}; // стр. 112
 	double beta_tmp[3] = {};
-	
+
 	for (int i = 1; i < n_borders - 1; ++i)
 	{
 		// Стр. 112
 		int i_tmp = i + par.nx_fict - 1;
-		
+
 	  	h0[i] = 1.0/3 * flux[i_tmp] + 5.0/6 * flux[i_tmp + 1] - 1.0/6 * flux[i_tmp + 2];
 	  	h1[i] = -1.0/6 * flux[i_tmp - 1] + 5.0/6 * flux[i_tmp] + 1.0/3 * flux[i_tmp + 1];
 	  	h2[i] = 1.0/3 * flux[i_tmp - 2] - 7.0/6 * flux[i_tmp - 1] + 11.0/6 * flux[i_tmp];
@@ -53,7 +51,7 @@ void Solver_WENO5_1D::get_WENO_reconstruction(double* flux, int n_borders, doubl
 			1.0/4 * pow(flux[i_tmp - 1] - flux[i_tmp + 1], 2);
 		beta_tmp[2] = 13.0/12 * pow(flux[i_tmp - 2] - 2 * flux[i_tmp - 1] + flux[i_tmp], 2) + \
 			1.0/4 * pow(flux[i_tmp - 2] - 4 * flux[i_tmp - 1] + 3 * flux[i_tmp], 2);
-		
+
 		// hl == u_left
 		double sum_alpha = 0.0;
 		for (int k = 0; k < 3; ++k)
@@ -91,7 +89,7 @@ void Solver_WENO5_1D::get_WENO_reconstruction(double* flux, int n_borders, doubl
 		}
 		hr[i] = omega_tmp[0] * h3[i] + omega_tmp[1] * h0[i] + omega_tmp[2] * h1[i];
 	}
-	
+
 	for (int i = 0; i < n_borders; ++i)
 	{
 		//std::cout << hr[i] << " ";
@@ -102,7 +100,7 @@ void Solver_WENO5_1D::get_WENO_reconstruction(double* flux, int n_borders, doubl
 
 void Solver_WENO5_1D::solve_step()
 {
-	//apply_boundary_conditions();
+	apply_boundary_conditions();
 	get_time_step();
     t += dt;
 
@@ -121,7 +119,7 @@ void Solver_WENO5_1D::solve_step()
 	for (int stencil = 1; stencil < 4; ++stencil)
 	{
 		// Приращение
-		// Потпоки в ячейки
+		// Потоки в ячейки
 		double flux_m[par.nx_all] = {};
 		double flux_imp[par.nx_all] = {};
 		double flux_e[par.nx_all] = {};
@@ -175,7 +173,7 @@ void Solver_WENO5_1D::solve_step()
 		double flowR_e[par.nx + 1] = {};
 
 		double h_arr[2][par.nx + 1] = {};
-		
+
 		get_WENO_reconstruction(flux_m_plus, par.nx + 1, &h_arr[0][0], 2);
 
 		for (int i = 0; i < par.nx + 1; ++i)
@@ -270,7 +268,7 @@ void Solver_WENO5_1D::solve_step()
 			{1.0, 0.0, 0.0, 0.0}, \
 			{1.0, 0.0, 0.0, 1.0}, \
 			{0.75, 0.25, 0.0, 0.25}, \
-			{1.0/3, 0.0, 2.0/3, 2.0/3}
+			{1.0/3.0, 0.0, 2.0/3.0, 2.0/3.0}
 		};
 
 
@@ -291,7 +289,7 @@ void Solver_WENO5_1D::solve_step()
 			rho_stencil[stencil][i] += rk[stencil][3] * L_m[i - par.nx_fict] * dt;
 			rho_u_stencil[stencil][i] += rk[stencil][3] * L_imp[i - par.nx_fict] * dt;
 			rho_e_stencil[stencil][i] += rk[stencil][3] * L_e[i - par.nx_fict] * dt;
-			
+
 	   		//std::cout << rho_stencil[1][i] << " ";
 		}
 	  	//std::cout << std::endl;
@@ -303,7 +301,7 @@ void Solver_WENO5_1D::solve_step()
 
 			rho_u_stencil[stencil][i] = rho_u_stencil[stencil][par.nx_fict];
 			rho_u_stencil[stencil][par.nx_all - i - 1] = rho_u_stencil[stencil][par.nx_all - par.nx_fict - 1];
-			
+
 			rho_e_stencil[stencil][i] = rho_e_stencil[stencil][par.nx_fict];
 			rho_e_stencil[stencil][par.nx_all - i - 1] = rho_e_stencil[stencil][par.nx_all - par.nx_fict - 1];
 		}

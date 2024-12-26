@@ -24,7 +24,7 @@ int main(int argv, char** argc)
 		if (choose == 1) Solver_Lagrange1D solver(par);
 		else if (choose == 2) Solver_Godunov1D solver(par);
 		else if (choose == 3) Solver_McCormack1D solver(par);
-		else if (choose == 4) Solver_WENO5_1D solver(par);
+//		else if (choose == 4) Solver_WENO5_1D solver(par);
 		else
 		{
 			std::cout << "Choose another value";

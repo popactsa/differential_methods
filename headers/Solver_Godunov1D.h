@@ -14,7 +14,7 @@ public:
     int step;
     double *F_m, *F_imp, *F_e;
 
-	Solver_Godunov1D(const Parameters& _par, bool = false);
+	Solver_Godunov1D(const Parameters& _par, bool = true);
     virtual void apply_boundary_conditions();
     virtual void solve_step();
     virtual void set_initial_conditions();

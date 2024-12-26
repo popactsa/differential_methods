@@ -11,9 +11,11 @@ class Solver_McCormack1D: public Solver_Godunov1D
 		Solver_McCormack1D(const Parameters& _par);
 		void solve_step() override;
 		~Solver_McCormack1D();
+		void diffusion(double Q, double* u, double* Du);
+		void anti_diffusion(double Q, double* u, double* Nu);
 	private:
-		constexpr static double a[2]{0.0, 1.0};
-		constexpr static double b[2]{0.5, 0.5};
+		const double a[2]{0.0, 1.0};
+		const double b[2]{0.5, 0.5};
 		double* U[3];
 		double* H[3];
 		double* h[3];
