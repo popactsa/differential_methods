@@ -14,10 +14,10 @@ class Solver_Lagrange1D: public iSolver {
 public:
 	Solver_Lagrange1D(const Parameters& _par);
 	void apply_boundary_conditions();
-    void solve_step();
-    void set_initial_conditions();
-    void get_time_step();
-    void write_data();
+	void solve_step();
+	void set_initial_conditions();
+	void get_time_step();
+	void write_data();
 	~Solver_Lagrange1D();
 };
 #endif
