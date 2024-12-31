@@ -5,19 +5,20 @@
 #include "iSolver.h"
 
 class Solver_Lagrange1D: public iSolver {
-	const Parameters par;
-	double *p, *rho, *U, *m;
-	double *v, *x;
-	double t, dt;
-	int step; // current time step
-	double *omega; // viscosity
-public:
-	Solver_Lagrange1D(const Parameters& _par);
-	void apply_boundary_conditions();
-	void solve_step();
-	void set_initial_conditions();
-	void get_time_step();
-	void write_data();
-	~Solver_Lagrange1D();
+	public:
+		Solver_Lagrange1D(const Parameters& _par);
+		void apply_boundary_conditions();
+		void solve_step();
+		void set_initial_conditions();
+		void get_time_step();
+		void write_data();
+		~Solver_Lagrange1D();
+	private:
+		const Parameters par;
+		double *p, *rho, *U, *m;
+		double *v, *x;
+		double t, dt;
+		int step; // current time step
+		double *omega; // viscosity
 };
 #endif
