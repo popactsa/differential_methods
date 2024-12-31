@@ -5,16 +5,11 @@ Solver_WENO5_1D::Solver_WENO5_1D(const Parameters& _par):
 {
 	for (step = 1; step <= par.nt; ++step)
 	{
-    	// Решение на текущем шаге
-    	solve_step();
-		if (step % par.nt_write == 0)
-        	write_data();
-
-  		if(step == par.nt)
-  			write_exact_solution(*this);
+    		solve_step();
+		if (step % par.nt_write == 0) write_data();
 	}
-// Конец расчета
-std::cout << "\nDone WENO5" << std::endl;
+  	write_exact_solution(*this);
+	std::cout << "\nDone WENO5" << std::endl;
 }
 
 void Solver_WENO5_1D::get_WENO_reconstruction(double* flux, int n_borders, double* out_arr, int size1)
@@ -102,7 +97,7 @@ void Solver_WENO5_1D::solve_step()
 {
 	apply_boundary_conditions();
 	get_time_step();
-    t += dt;
+	t += dt;
 
 	int num_stencils = 1 + 3;
 	double rho_stencil[num_stencils][par.nx_all] = {};
