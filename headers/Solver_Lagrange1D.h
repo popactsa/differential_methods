@@ -12,6 +12,7 @@ class Solver_Lagrange1D: public iSolver {
 		void set_initial_conditions();
 		void get_time_step();
 		void write_data();
+		void check_parameters();
 		~Solver_Lagrange1D();
 	private:
 		const Parameters par;

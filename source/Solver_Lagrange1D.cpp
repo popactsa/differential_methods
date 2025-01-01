@@ -1,9 +1,11 @@
 #include "Solver_Lagrange1D.h"
 #include <cmath>
 #include <fstream>
+#include "error_handling.h"
 Solver_Lagrange1D::Solver_Lagrange1D(const Parameters& _par):
     par(_par)
 {
+	check_parameters();
 	p = new double[par.nx_all];
 	rho = new double[par.nx_all];
 	U = new double[par.nx_all];
@@ -26,6 +28,19 @@ Solver_Lagrange1D::Solver_Lagrange1D(const Parameters& _par):
 		if (step % par.nt_write == 0) write_data();
 	}
 	std::cout << "done" << std::endl;
+}
+
+void Solver_Lagrange1D::check_parameters()
+{
+	try
+	{
+		expect([&par = par]{return par.x_start <= par.x_end; }, Error_code::incorrect_order);
+	}
+	catch (const Error_code& err)
+	{
+		std::cerr << "Error: " << Error_code_name[int(err)] << std::endl;
+		std::terminate();
+	}
 }
 
 Solver_Lagrange1D::~Solver_Lagrange1D()
