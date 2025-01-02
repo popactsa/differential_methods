@@ -19,15 +19,18 @@ constexpr Error_action default_Error_action = Error_action::throwing;
 enum class Error_code
 {
 	negative_value,
+	non_positive_value,
 	incorrect_order,
-	same_value		
+	same_value,
+	TBD
 };
 
 std::string Error_code_name[]
 {
 	"negative value",
 	"incorrect order",
-	"same value"
+	"same value",
+	"TBD"
 };
 
 struct Error

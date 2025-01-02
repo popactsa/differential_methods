@@ -15,11 +15,6 @@ Solver_Lagrange1D::Solver_Lagrange1D(const Parameters& _par):
 	v = std::make_unique<double[]>(par.nx_all + 1);
 	x = std::make_unique<double[]>(par.nx_all + 1);
 	omega = std::make_unique<double[]>(par.nx_all);
-	if (par.nx_fict > 1)
-	{
-		std::cerr << "cases of nx_fict > 2 are not processed" << std::endl;
-		exit(1);
-	}
 	
 	set_initial_conditions();
 	for (step = 1; step <= par.nt; step++)
@@ -36,6 +31,14 @@ void Solver_Lagrange1D::check_parameters()
 	try
 	{
 		expect<Error_action::throwing>([&par = par]{return par.x_start < par.x_end; }, Error(Error_code::incorrect_order, "par.x_start < par.x_end"));
+		expect<Error_action::throwing>([&par = par]{return !(par.nx_fict > 1); }, Error(Error_code::TBD, "par.nx_fict > 1"));
+		expect<Error_action::throwing>([&par = par]{return !(par.nx_fict <= 0); }, Error(Error_code::negative_value, "par.nx_fict <= 0"));
+		expect<Error_action::throwing>([&par = par]{return par.gamma > 0.0; }, Error(Error_code::non_positive_value, "par.gamma >= 0"));
+		expect<Error_action::throwing>([&par = par]{return par.nt > 0; }, Error(Error_code::non_positive_value, "par.nt > 0"));
+		expect<Error_action::throwing>([&par = par]{return par.nt_write > 0; }, Error(Error_code::negative_value, "par.nt_write > 0"));
+		expect<Error_action::throwing>([&par = par]{return par.CFL > 0.0; }, Error(Error_code::non_positive_value, "par.CFL > 0"));
+		expect<Error_action::throwing>([&par = par]{return par.mu0 > 0; }, Error(Error_code::non_positive_value, "par.mu0 > 1"));
+
 	}
 	catch (const Error& err)
 	{
@@ -62,11 +65,6 @@ void Solver_Lagrange1D::apply_boundary_conditions()
 				{
 					v[par.nx_fict] = -2.0;
 					v[par.nx_all - par.nx_fict] = 2.0;
-				}
-				else
-				{
-					std::cerr << "For nx_fict = " << par.nx_fict << " bc is not specified" << std::endl;
-					exit(1);
 				}
 				v[i_temp] = -v[i_temp + (1 - 2 * i) * 2] + 2.0 * v[i_temp + (1 - 2 * i)]; // ochen' hitro, Victor, a glavnoe, malo ponyatno
 				break;
