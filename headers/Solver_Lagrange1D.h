@@ -3,6 +3,7 @@
 
 #include "Parameters.h"
 #include "iSolver.h"
+#include <memory>
 
 class Solver_Lagrange1D: public iSolver {
 	public:
@@ -16,10 +17,10 @@ class Solver_Lagrange1D: public iSolver {
 		~Solver_Lagrange1D();
 	private:
 		const Parameters par;
-		double *p, *rho, *U, *m;
-		double *v, *x;
+		std::unique_ptr<double[]> p, rho, U, m;
+		std::unique_ptr<double[]> v, x;
+		std::unique_ptr<double[]> omega; //viscosity
 		double t, dt;
-		int step; // current time step
-		double *omega; // viscosity
+		int step;
 };
 #endif

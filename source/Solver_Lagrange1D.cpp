@@ -3,18 +3,18 @@
 #include <fstream>
 #include <string>
 #include "error_handling.h"
+#include <memory>
 Solver_Lagrange1D::Solver_Lagrange1D(const Parameters& _par):
     par(_par)
 {
 	check_parameters();
-	p = new double[par.nx_all];
-	rho = new double[par.nx_all];
-	U = new double[par.nx_all];
-	m = new double[par.nx_all];
-	v = new double[par.nx_all + 1];
-	x = new double[par.nx_all + 1];
-	omega = new double[par.nx_all];
-
+	p = std::make_unique<double[]>(par.nx_all);
+	rho = std::make_unique<double[]>(par.nx_all);
+	U = std::make_unique<double[]>(par.nx_all);
+	m = std::make_unique<double[]>(par.nx_all);
+	v = std::make_unique<double[]>(par.nx_all + 1);
+	x = std::make_unique<double[]>(par.nx_all + 1);
+	omega = std::make_unique<double[]>(par.nx_all);
 	if (par.nx_fict > 1)
 	{
 		std::cerr << "cases of nx_fict > 2 are not processed" << std::endl;
@@ -43,17 +43,6 @@ void Solver_Lagrange1D::check_parameters()
 		std::cerr << "failure : " << what_msg << std::endl;
 		std::terminate();
 	}
-}
-
-Solver_Lagrange1D::~Solver_Lagrange1D()
-{
-	delete[] p;
-	delete[] rho;
-	delete[] U;
-	delete[] m;
-	delete[] v;
-	delete[] x;
-	delete[] omega;
 }
 
 void Solver_Lagrange1D::apply_boundary_conditions()
