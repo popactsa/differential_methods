@@ -9,8 +9,6 @@
 
 Чтобы запустить наш чудесный проектик тебе нужно сделать три небольших шага:
 
-make install
-
 make
 
 :heartpulse: :broken_heart: :innocent: :flushed: :nail_care: :fire: 
