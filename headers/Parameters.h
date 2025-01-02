@@ -13,7 +13,6 @@
 const double R = 8.31;
 
 enum InitialPreset {
-	IC_CUSTOM,
 	IC_TEST1,
 	IC_TEST2,
 	IC_TEST3,

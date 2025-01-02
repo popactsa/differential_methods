@@ -210,14 +210,13 @@ void Solver_Godunov1D::write_data()
 {
 	std::string file_name = "data/" + std::to_string(step) + ".csv";
 	std::ofstream file(file_name);
-	double rho_out, u_out, p_out, int_e_out, x_out;
+	double rho_out, u_out, p_out, x_out;
 	
 	for(int i = 0; i < par.nx; i++)
 	{
 		rho_out = rho[par.nx_fict + i];
 		u_out = rho_u[par.nx_fict + i] / rho_out;
 		p_out = p[par.nx_fict + i];
-		int_e_out = rho_e[par.nx_fict + i] / rho_out - pow(u_out, 2) / 2.0;
 		x_out = x[par.nx_fict + i];
 		
 		file << x_out<< " " << rho_out << " " << u_out << " " << p_out << "\n";
@@ -350,6 +349,7 @@ void Solver_Godunov1D::apply_godunov_method(double* F_m, double* F_imp, double* 
 			p_temp, rho_temp, u_temp);
 		switch (par.flux_scheme)
 		{
+			case F_RLF:
 			case F_GODUNOV:
 				get_godunov_flux(p_temp, rho_temp, u_temp,
 					F_m[i], F_imp[i], F_e[i]);
@@ -608,6 +608,8 @@ double minmod(Reconstruction reconstruction_type, double a, double b)
 			else
 				grad = 0.0;
 			break;
+		case R_GODUNOV:
+			grad = 0.0;
 	}
 	return grad;
 }

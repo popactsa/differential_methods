@@ -35,8 +35,8 @@ struct Error
 	Error_code ec;
 	std::string msg;
 
-	Error(Error_code _ec, const char* _msg): msg{_msg}, ec{_ec} {}
-	Error(Error_code _ec): msg{"<blank>"}, ec{_ec} {}
+	Error(Error_code _ec, const char* _msg): ec{_ec}, msg{_msg} {}
+	Error(Error_code _ec): ec{_ec}, msg{"<blank>"} {}
 	
 	const char* what() const
 	{
