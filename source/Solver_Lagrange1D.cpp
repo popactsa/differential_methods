@@ -1,6 +1,7 @@
 #include "Solver_Lagrange1D.h"
 #include <cmath>
 #include <fstream>
+#include <string>
 #include "error_handling.h"
 Solver_Lagrange1D::Solver_Lagrange1D(const Parameters& _par):
     par(_par)
@@ -34,11 +35,12 @@ void Solver_Lagrange1D::check_parameters()
 {
 	try
 	{
-		expect([&par = par]{return par.x_start <= par.x_end; }, Error_code::incorrect_order);
+		expect<Error_action::throwing>([&par = par]{return par.x_start < par.x_end; }, Error(Error_code::incorrect_order, "par.x_start < par.x_end"));
 	}
-	catch (const Error_code& err)
+	catch (const Error& err)
 	{
-		std::cerr << "Error: " << Error_code_name[int(err)] << std::endl;
+		const char* what_msg = err.what();
+		std::cerr << "failure : " << what_msg << std::endl;
 		std::terminate();
 	}
 }

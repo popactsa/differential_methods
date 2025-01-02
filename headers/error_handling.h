@@ -19,28 +19,44 @@ constexpr Error_action default_Error_action = Error_action::throwing;
 enum class Error_code
 {
 	negative_value,
-	missing,
-	bad_syntax,
-	incorrect_order
+	incorrect_order,
+	same_value		
 };
 
 std::string Error_code_name[]
 {
 	"negative value",
-	"missing",
-	"bad syntax",
-	"incorrect order"
+	"incorrect order",
+	"same value"
+};
+
+struct Error
+{
+	Error_code ec;
+	std::string msg;
+
+	Error(Error_code _ec, const char* _msg): msg{_msg}, ec{_ec} {}
+	Error(Error_code _ec): msg{"<blank>"}, ec{_ec} {}
+	
+	const char* what() const throw()
+	{
+		return msg.c_str();
+	}
+	inline const char* name()
+	{
+		return Error_code_name[int(ec)].c_str();
+	}
 };
 
 template<Error_action action = default_Error_action, class C>
-constexpr void expect(C cond, Error_code x)
+constexpr void expect(C cond, Error x)
 {
 	if constexpr (action == Error_action::throwing)
 		if (!cond()) throw x;
 	if constexpr (action == Error_action::terminating)
 		if (!cond()) std::terminate();
 	if constexpr (action == Error_action::logging)
-		if (!cond()) std::cerr << "expect() failure: " << int(x) << ' ' << Error_code_name[int(x)] << std::endl;
+		if (!cond()) std::cerr << "expect() failure: " << x.name() << ' ' << x.what() << std::endl;
 	// ignore -> nothing happens
 }
 
