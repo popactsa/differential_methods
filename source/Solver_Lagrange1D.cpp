@@ -30,14 +30,14 @@ void Solver_Lagrange1D::check_parameters()
 {
 	try
 	{
-		expect<Error_action::throwing>([&par = par]{return par.x_start < par.x_end; }, Error(Error_code::incorrect_order, "par.x_start < par.x_end"));
-		expect<Error_action::throwing>([&par = par]{return !(par.nx_fict > 1); }, Error(Error_code::TBD, "par.nx_fict > 1"));
-		expect<Error_action::throwing>([&par = par]{return !(par.nx_fict <= 0); }, Error(Error_code::negative_value, "par.nx_fict <= 0"));
-		expect<Error_action::throwing>([&par = par]{return par.gamma > 0.0; }, Error(Error_code::non_positive_value, "par.gamma >= 0"));
-		expect<Error_action::throwing>([&par = par]{return par.nt > 0; }, Error(Error_code::non_positive_value, "par.nt > 0"));
-		expect<Error_action::throwing>([&par = par]{return par.nt_write > 0; }, Error(Error_code::negative_value, "par.nt_write > 0"));
-		expect<Error_action::throwing>([&par = par]{return par.CFL > 0.0; }, Error(Error_code::non_positive_value, "par.CFL > 0"));
-		expect<Error_action::throwing>([&par = par]{return par.mu0 > 0; }, Error(Error_code::non_positive_value, "par.mu0 > 1"));
+		expect<Error_action::throwing>([this]{return par.x_start < par.x_end; }, Error(Error_code::incorrect_order, "par.x_start < par.x_end"));
+		expect<Error_action::throwing>([this]{return !(par.nx_fict > 1); }, Error(Error_code::TBD, "par.nx_fict > 1"));
+		expect<Error_action::throwing>([this]{return !(par.nx_fict <= 0); }, Error(Error_code::negative_value, "par.nx_fict <= 0"));
+		expect<Error_action::throwing>([this]{return par.gamma > 0.0; }, Error(Error_code::non_positive_value, "par.gamma > 0"));
+		expect<Error_action::throwing>([this]{return par.nt > 0; }, Error(Error_code::non_positive_value, "par.nt > 0"));
+		expect<Error_action::throwing>([this]{return par.nt_write > 0; }, Error(Error_code::negative_value, "par.nt_write > 0"));
+		expect<Error_action::throwing>([this]{return par.CFL > 0.0; }, Error(Error_code::non_positive_value, "par.CFL > 0"));
+		expect<Error_action::throwing>([this]{return par.mu0 > 0; }, Error(Error_code::non_positive_value, "par.mu0 > 1"));
 
 	}
 	catch (const Error& err)
