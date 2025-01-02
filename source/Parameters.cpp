@@ -54,10 +54,6 @@ Parameters::Parameters(std::string file_name) {
 	};
 
 	
-	InitialPreset ic_test = IC_CUSTOM;
-	
-	for (int i = 0; i < 2; ++i) boundaries[i].b_preset = B_CUSTOM;
-	
 	if (fin.is_open()) {
 		std::string line;
 		const std::string sep = "\t";
@@ -137,16 +133,6 @@ Parameters::Parameters(std::string file_name) {
 			nx_all = nx + 2 * nx_fict;
 			Cv = R / (gamma - 1.0);
 			Cp = Cv + R;
-			
-			if (ic_test != IC_CUSTOM) {
-				ic_preset = InitialPreset(ic_test);
-				for (int i = 0; i < 2; ++i) {
-					boundaries[i].b_preset = BoundaryPreset(ic_test); // it's easier to specify further boundary values in solver,
-											  // than to add many elif cases here //
-											  // assigned boundary values don't matter
-											  // i'm sorry
-			}
-		}
 	}
 	else {
 		std::cerr << "Can't open the file: " << file_name << std::endl;

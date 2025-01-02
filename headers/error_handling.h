@@ -38,7 +38,7 @@ struct Error
 	Error(Error_code _ec, const char* _msg): msg{_msg}, ec{_ec} {}
 	Error(Error_code _ec): msg{"<blank>"}, ec{_ec} {}
 	
-	const char* what() const throw()
+	const char* what() const
 	{
 		return msg.c_str();
 	}
