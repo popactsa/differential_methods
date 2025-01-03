@@ -8,13 +8,13 @@ Solver_Lagrange1D::Solver_Lagrange1D(const Parameters& _par):
     par(_par)
 {
 	check_parameters();
-	p = std::make_unique<double[]>(par.nx_all);
-	rho = std::make_unique<double[]>(par.nx_all);
-	U = std::make_unique<double[]>(par.nx_all);
-	m = std::make_unique<double[]>(par.nx_all);
-	v = std::make_unique<double[]>(par.nx_all + 1);
-	x = std::make_unique<double[]>(par.nx_all + 1);
-	omega = std::make_unique<double[]>(par.nx_all);
+	p.reset(new double[par.nx_all]{});
+	rho.reset(new double[par.nx_all]{});
+	U.reset(new double[par.nx_all]{});
+	m.reset(new double[par.nx_all]{});
+	v.reset(new double[par.nx_all + 1]{});
+	x.reset(new double[par.nx_all + 1]{});
+	omega.reset(new double[par.nx_all]{});
 	
 	set_initial_conditions();
 	for (step = 1; step <= par.nt; step++)

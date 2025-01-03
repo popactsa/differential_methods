@@ -16,9 +16,9 @@ class Solver_Lagrange1D: public iSolver {
 		void check_parameters();
 	private:
 		const Parameters par;
-		std::unique_ptr<double[]> p, rho, U, m;
-		std::unique_ptr<double[]> v, x;
-		std::unique_ptr<double[]> omega; //viscosity
+		std::shared_ptr<double[]> p, rho, U, m;
+		std::shared_ptr<double[]> v, x;
+		std::shared_ptr<double[]> omega; //viscosity
 		double t, dt;
 		int step;
 };
